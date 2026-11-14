@@ -2,7 +2,7 @@
 
 This divides only [Dallas's assignment](dallas.md). Read [AGENTS.md](../AGENTS.md) and [teammates.md](../teammates.md) first. Keyan, Steve, and Will retain their own files and decisions. Dallas integrates their handoffs; no AI tool edits the shared status file independently.
 
-Start with the short task brief for your tool: [Codex](dallas-codex.md), [Cursor](dallas-cursor.md), or [Antigravity](dallas-antigravity.md).
+Start with the short task brief for your tool: [Codex](dallas-codex.md), [Cursor](dallas-cursor.md), or [Antigravity](dallas-antigravity.md). [T3 Chat](dallas-t3.md) is a separate reviewer and communication helper, not a code writer; it has no exclusive repository paths.
 
 | Tool | Dallas-owned work and exclusive paths |
 |---|---|
