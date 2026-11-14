@@ -108,41 +108,41 @@ describe('submitPasteJob', () => {
     }
   });
 
-  it('builds against fixture JobPosting shape when no custom fetch is provided while route is pending', async () => {
+  it('uses the merged parse route through global fetch by default', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ data: mockServerPosting }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
     const result = await submitPasteJob(validBaseInput);
 
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toBe(PARSE_JOB_ROUTE);
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.posting.title).toBe('Junior Web Developer');
-      expect(result.posting.company).toBe('North Star Labs');
-      expect(result.posting.source).toBe('pasted');
+      expect(result.posting.id).toBe(mockServerPosting.id);
       expect(result.posting.status).toBe('private');
-      expect(result.posting.deadlineVerified).toBe(false);
-
-      const contractCheck = JobPostingSchema.safeParse(result.posting);
-      expect(contractCheck.success).toBe(true);
+      expect(JobPostingSchema.safeParse(result.posting).success).toBe(true);
     }
+
+    vi.unstubAllGlobals();
   });
 
-  it('validates required fields in fixture mode', async () => {
-    const emptyInput: PasteJobInput = {
-      title: '',
-      company: '',
-      description: '',
-      location: '',
-      jobType: 'unknown',
-      workMode: 'unknown',
-      sourceUrl: '',
-      deadline: '',
-    };
+  it('returns a typed error when the merged parse route is unreachable', async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error('network unavailable'));
+    vi.stubGlobal('fetch', fetchMock);
 
-    const result = await submitPasteJob(emptyInput);
+    const result = await submitPasteJob(validBaseInput);
 
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.errors.title).toBeTruthy();
-      expect(result.errors.company).toBeTruthy();
-      expect(result.errors.description).toBeTruthy();
-    }
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      ok: false,
+      errors: {},
+      message: 'Unable to reach job parse service',
+    });
+
+    vi.unstubAllGlobals();
   });
 });
