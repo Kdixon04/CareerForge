@@ -1,6 +1,6 @@
 # Keyan — Supabase, employer features, and security
 
-Read [AGENTS.md](../AGENTS.md) first. You own Supabase work already underway; Dallas reviews shared contracts, not each SQL keystroke. Publish schema/adapters early so the team can work concurrently.
+Read [AGENTS.md](../AGENTS.md) and the current [team handoff](../teammates.md) before editing. You own Supabase work already underway; Dallas reviews shared contracts, not each SQL keystroke. Publish schema/adapters early so the team can work concurrently. Report cross-person dependencies with exact fields, signatures, and affected owner to Dallas in your handoff; do not change another owner's files.
 
 Known skills: Python, JavaScript, HTML/CSS, Linux CLI, PowerShell, MySQL; cybersecurity focus. Next.js/TypeScript/PostgreSQL/RLS experience and availability remain unconfirmed. Ask for a short pairing session on unfamiliar setup; use focused agent assistance and report what you verified.
 
