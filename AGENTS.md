@@ -202,3 +202,8 @@ Before submit: deployed signed-out -> sign-in -> complete student journey; emplo
 
 Decision register: confirmed Career Forge, four teammates, Keyan owns Supabase, employer posting/reach, Claude-first with optional APIs, Vercel, test-first/Playwright/mobile, both themes. Defaults: Next.js/TypeScript, one employer/account, seeded employer/admin roles, lifetime account-based unique views/current saves. TBD: final model/tool availability, actual logo/prototype asset paths/fonts/colors, Supabase project/migration state, configured limiter and runtime limits, exact organizer cutoff, video host/visibility, teammate availability. Owner changes require a short recorded handoff.
 
+| # | Decision | Status |
+|---|---|---|
+| 18 | Zod 3 high advisory (GHSA-mrhx-c7xc-m3w5) — upgrade to Zod 4 is breaking; blocked on Codex/Dallas owning package.json | BLOCKED |
+
+
