@@ -1,13 +1,13 @@
 'use client';
 
 import type { StudentProfile } from '../../../contracts';
-import { ThemeProvider } from '../../../components/theme/ThemeProvider';
 import { ThemeToggle } from '../../../components/theme/ThemeToggle';
 import { ProfileForm } from './ProfileForm';
 
 export function ProfilePreview({ initialProfile }: { initialProfile: StudentProfile }) {
-  return <ThemeProvider>
-    <div className="cf-profile">
+  // RootLayout owns the single provider. Keep this page's header until RootShell
+  // is applied to the profile route as well as Home.
+  return <div className="cf-profile">
       <a className="cf-skip" href="#profile-main">Skip to profile</a>
       <div className="cf-profile-shell">
         <header className="cf-profile-header"><a href="/" className="cf-profile-brand">Career Forge</a><ThemeToggle /></header>
@@ -18,6 +18,5 @@ export function ProfilePreview({ initialProfile }: { initialProfile: StudentProf
           <ProfileForm initialProfile={initialProfile} />
         </main>
       </div>
-    </div>
-  </ThemeProvider>;
+    </div>;
 }
