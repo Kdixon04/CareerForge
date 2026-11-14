@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+const EXAMPLE_JOB_ID = '22222222-2222-4222-8222-222222222222';
+
 // Covers the fictional pasted-job slice at /jobs: honest "unsaved / unverified"
 // labelling, an example opportunity with a source link, client-side validation
 // errors, a safe (escaped) preview of pasted text, and both themes at phone and
@@ -13,7 +15,14 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       const errors: string[] = [];
       page.on('pageerror', error => errors.push(error.message));
       page.on('console', message => {
-        if (message.type() === 'error' && !message.location().url.endsWith('/favicon.ico')) errors.push(message.text());
+        if (message.type() !== 'error' || message.location().url.endsWith('/favicon.ico')) return;
+
+        // These two 400 responses are intentional validation cases exercised
+        // below. Browsers report failed HTTP resources to the console even
+        // though the application handles the responses and displays errors.
+        const text = message.text();
+        if (/Failed to load resource:.*status of 400/i.test(text)) return;
+        errors.push(text);
       });
 
       await page.goto('/jobs');
@@ -67,6 +76,14 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       await expect(card.getByText(xssText)).toBeVisible();
       expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined();
       expect(await page.locator('.cf-jobs-card-description img').count()).toBe(0);
+
+      await expect(card.getByRole('link', { name: 'Continue to job detail (fixture-backed)' })).toBeVisible();
+      await card.getByRole('link', { name: 'Continue to job detail (fixture-backed)' }).click();
+      // Parse route assigns a new preview id; only the fictional example id resolves on detail until import.
+      await expect(page.getByText('No fixture posting matches this id.')).toBeVisible();
+      await page.goto(`/jobs/${EXAMPLE_JOB_ID}`);
+      await expect(page.getByText('Fixture preview — not loaded from the database.')).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Review résumé suggestions' })).toBeVisible();
 
       // No horizontal overflow and no console/page errors.
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
