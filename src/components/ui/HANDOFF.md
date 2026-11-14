@@ -1,8 +1,10 @@
 # Steve design and profile handoff
 
+Current integration note (November 14, 2026): main has sign-in, a connected `/profile` loader and `/api/profile` save route, and published-job browsing. Fictional profile mode runs only with `CAREERFORGE_E2E_PROFILE_FIXTURE=1`; it disables saving and resets edits on reload. The normal signed-in route needs separate database and two-account verification. PR #17's theme change removes the redundant profile `ThemeProvider` while preserving connected saving; its new navigation test runs in fixture mode and does not prove persistence. Private pasted-job saving and the live résumé journey remain unavailable. Zod is 4.6.6. Older milestone notes below are historical; check current code and CI before relying on their status.
+
 ## State and boundaries
 
-CareerForge main has the Next.js 15/React 18 scaffold, provisional [contracts](../../contracts/) and [fictional examples](../../data/examples.ts). This branch adds light/dark theme components, navigation, Button/Input/Textarea and a real `/profile` route backed by fictional data. Its form supports editable facts and validation; **Save profile is disabled** until Keyan supplies a verified, user-scoped adapter. Reload discards edits. There is no real auth, saved-application route, persistence or AI flow here. The port-4317 component harness is a separate fixture; its `/saved` page is only an empty-state example.
+CareerForge main has the Next.js 15/React 18 scaffold, provisional [contracts](../../contracts/) and [fictional examples](../../data/examples.ts), sign-in, a connected `/profile` save path, and published-job browsing. `/profile` uses unsaved fictional data only in explicit E2E fixture mode. This branch adds an explicitly fictional, in-memory `/saved` tracking preview; see the [saved UI handoff](../../app/(student)/saved/HANDOFF.md). No saved-application persistence or live résumé flow is established by this preview. The port-4317 component harness is a separate fixture.
 
 Current main's `AGENTS.md` is the shared rule source. This branch removes the displaced `AGENTS.reference.md` and keeps Steve's assigned component/profile work.
 

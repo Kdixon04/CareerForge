@@ -3,6 +3,9 @@
 import { useMemo, useState } from 'react';
 import type { ResumeVersion } from '../../../contracts';
 import { Button } from '../../../components/ui/Button';
+import { formatEditedBulletsForCopy } from './match-copy-bullets';
+
+type CopyStatus = { kind: 'success' | 'error'; message: string } | null;
 
 export function MatchReview({ resume }: { resume: ResumeVersion }) {
   const initialById = useMemo(
@@ -10,11 +13,36 @@ export function MatchReview({ resume }: { resume: ResumeVersion }) {
     [resume.editedBullets],
   );
   const [edits, setEdits] = useState<Record<string, string>>(Object.fromEntries(initialById));
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>(null);
 
   const factTextById = useMemo(
     () => new Map(resume.factSnapshot.map(f => [f.id, f.text])),
     [resume.factSnapshot],
   );
+
+  const copyEditedBullets = async () => {
+    const text = formatEditedBulletsForCopy(resume.generatedBullets, edits);
+    if (!text) {
+      setCopyStatus({
+        kind: 'error',
+        message: 'Nothing to copy yet. Add text to at least one bullet.',
+      });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus({
+        kind: 'success',
+        message:
+          'Copied your edited bullets to the clipboard. Saving is still not connected — edits will not survive reload.',
+      });
+    } catch {
+      setCopyStatus({
+        kind: 'error',
+        message: 'Could not copy automatically. Select the bullet text and copy manually.',
+      });
+    }
+  };
 
   return (
     <>
@@ -51,10 +79,29 @@ export function MatchReview({ resume }: { resume: ResumeVersion }) {
             </li>
           ))}
         </ul>
-        <Button type="button" variant="secondary" disabled aria-describedby="match-save-hint">
-          Save edits (not connected)
-        </Button>
-        <p className="cf-hint" id="match-save-hint">Server-side PATCH /api/resume/[id] is not wired in this fixture slice.</p>
+        <div className="cf-match-actions">
+          <Button type="button" variant="secondary" onClick={copyEditedBullets} aria-describedby="match-copy-hint">
+            Copy edited bullets
+          </Button>
+          <Button type="button" variant="secondary" disabled aria-describedby="match-save-hint">
+            Save edits (not connected)
+          </Button>
+        </div>
+        <p className="cf-hint" id="match-copy-hint">
+          Copy uses your current edits in the text boxes above, not the original generated draft.
+        </p>
+        <p className="cf-hint" id="match-save-hint">
+          Saving requires PATCH /api/resume/[id] and is not connected in this fixture slice.
+        </p>
+        {copyStatus && (
+          <p
+            className={copyStatus.kind === 'error' ? 'cf-error' : 'cf-hint'}
+            role="status"
+            aria-live="polite"
+          >
+            {copyStatus.message}
+          </p>
+        )}
       </section>
 
       <section className="cf-match-section" aria-label="Requirement gaps">

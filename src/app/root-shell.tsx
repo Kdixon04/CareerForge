@@ -2,25 +2,37 @@
 
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { MainNav } from '../components/nav/MainNav';
+import { MainNav, type NavLink } from '../components/nav/MainNav';
 import { ThemeToggle } from '../components/theme/ThemeToggle';
 
-// Only routes that actually exist today are listed. There is intentionally no
-// employer link: employer access requires a server-verified role, which does not
-// exist in this slice, and a presentation-only flag must never surface it. Jobs and
-// Saved are deliberately omitted until those routes are built.
-const NAV_LINKS = [
+/** Landing chrome: home plus the full student journey links judges should discover. */
+export const HOME_NAV_LINKS: NavLink[] = [
   { href: '/', label: 'Home' },
   { href: '/profile', label: 'Profile' },
+  { href: '/jobs', label: 'Find jobs' },
+  { href: '/saved', label: 'Saved' },
+  { href: '/calendar', label: 'Calendar' },
+];
+
+/** In-app student routes: brand link returns home; omit a redundant Home nav item. */
+export const STUDENT_NAV_LINKS: NavLink[] = [
+  { href: '/profile', label: 'Profile' },
+  { href: '/jobs', label: 'Find jobs' },
+  { href: '/saved', label: 'Saved' },
+  { href: '/calendar', label: 'Calendar' },
 ];
 
 /**
- * Dallas-owned landing chrome. It uses Steve's shared `MainNav` (passing only the
- * routes that exist today), `.cf-skip` skip link and theme toggle, and bridges the
- * top-level page surface to the theme tokens so light/dark visibly affects the real
- * landing page.
+ * Dallas-owned shared chrome. It uses Steve's `MainNav`, `.cf-skip` skip link and theme
+ * toggle, and bridges student surfaces to the theme tokens for light/dark.
  */
-export function RootShell({ children }: { children: ReactNode }) {
+export function RootShell({
+  children,
+  links = HOME_NAV_LINKS,
+}: {
+  children: ReactNode;
+  links?: NavLink[];
+}) {
   const pathname = usePathname() || '/';
   return (
     <div
@@ -54,7 +66,7 @@ export function RootShell({ children }: { children: ReactNode }) {
           Career Forge
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <MainNav currentPath={pathname} links={NAV_LINKS} />
+          <MainNav currentPath={pathname} links={links} />
           <ThemeToggle />
         </div>
       </header>

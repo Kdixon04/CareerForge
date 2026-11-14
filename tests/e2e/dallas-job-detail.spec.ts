@@ -23,7 +23,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme);
 
       // Listing links into the fixture detail page.
-      await page.getByRole('link', { name: 'Open example job detail' }).click();
+      await page.getByRole('link', { name: 'Open example job detail' }).first().click();
       await page.waitForURL(`**/jobs/${EXAMPLE_JOB_ID}`);
       await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme);
 
@@ -33,7 +33,8 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       await expect(page.getByText('Example opportunity')).toBeVisible();
       await expect(page.getByRole('article', { name: 'Job posting' })).toContainText('Build accessible web interfaces.');
       await expect(page.getByRole('link', { name: 'https://example.com/jobs/job-001' })).toBeVisible();
-      await expect(page.getByRole('link', { name: 'Review résumé suggestions' })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Review match', exact: true })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Prep for this role', exact: true })).toBeVisible();
 
       // Unknown id shows an honest empty state, not invented content.
       await page.goto(`/jobs/${UNKNOWN_JOB_ID}`);

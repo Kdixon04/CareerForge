@@ -1,8 +1,13 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { JobPostingSchema, type JobPosting } from '../../../contracts';
+import type { JobPosting } from '../../../contracts';
 import { submitPasteJob } from '../../../lib/jobs/submit-paste';
+import {
+  IS_JOB_PERSISTENCE_AVAILABLE,
+  importPrivateJob,
+  jobDraftFromPosting,
+} from './job-api-client';
 import {
   JOB_TYPE_LABELS,
   JOB_TYPE_OPTIONS,
@@ -23,17 +28,14 @@ export function PasteJobForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [preview, setPreview] = useState<JobPosting | null>(null);
-
+  const [savedPosting, setSavedPosting] = useState<JobPosting | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
-
+  const [saveError, setSaveError] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const companyRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const sourceUrlRef = useRef<HTMLInputElement>(null);
   const deadlineRef = useRef<HTMLInputElement>(null);
-
-  
 
   const update = (field: keyof PasteJobInput) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -47,11 +49,10 @@ export function PasteJobForm() {
     else if (fieldErrors.deadline) deadlineRef.current?.focus();
   };
 
-    const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
     setServerError(null);
-    setSaveMessage('');
 
     const result = await submitPasteJob(values);
     setIsSubmitting(false);
@@ -59,66 +60,47 @@ export function PasteJobForm() {
     if (result.ok) {
       setErrors({});
       setPreview(result.posting);
+      setSavedPosting(null);
+      setSaveError(null);
     } else {
       setPreview(null);
+      setSavedPosting(null);
       setErrors(result.errors);
-
       if (result.message && !Object.keys(result.errors).length) {
         setServerError(result.message);
       }
-
       focusFirstError(result.errors);
     }
   };
 
-  async function savePreview() {
-    if (!preview || isSaving) return;
-
-    setIsSaving(true);
-    setSaveMessage('');
-    setServerError(null);
-
-    try {
-      const response = await fetch('/api/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: preview.title,
-          company: preview.company,
-          description: preview.description,
-          location: preview.location,
-          jobType: preview.jobType,
-          workMode: preview.workMode,
-          sourceUrl: preview.sourceUrl,
-          deadline: preview.deadline,
-        }),
-      });
-
-      const body = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        setServerError(body?.error ?? 'Could not save this job.');
-        return;
-      }
-
-      const parsed = JobPostingSchema.safeParse(body?.data);
-
-      if (!parsed.success) {
-        setServerError('The saved job response was invalid.');
-        return;
-      }
-
-      setPreview(parsed.data);
-      setSaveMessage('Job saved privately.');
-    } catch {
-      setServerError('Could not reach the job save service.');
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
   const describedBy = (field: keyof PasteJobInput, hintId?: string) =>
     [hintId, errors[field] ? `${field}-error` : null].filter(Boolean).join(' ') || undefined;
+
+  const onSavePrivate = async () => {
+    if (!preview || !IS_JOB_PERSISTENCE_AVAILABLE) return;
+    setIsSaving(true);
+    setSaveError(null);
+    const result = await importPrivateJob(jobDraftFromPosting(preview));
+    setIsSaving(false);
+    if (result.ok) {
+      setSavedPosting(result.posting);
+      window.location.assign(`/jobs/${result.posting.id}`);
+      return;
+    }
+    if (result.status === 'not_available') {
+      setSaveError('Save is not connected yet.');
+      return;
+    }
+    if (result.status === 'network') {
+      setSaveError('Unable to reach the job service. Try again.');
+      return;
+    }
+    if (result.status === 401) {
+      setSaveError('Sign in to save this job.');
+      return;
+    }
+    setSaveError(result.message);
+  };
 
   return (
     <div className="cf-jobs-grid">
@@ -204,83 +186,70 @@ export function PasteJobForm() {
         </button>
       </form>
 
-      <section
-        className="cf-jobs-preview"
-        aria-label="Pasted job preview"
-        aria-live="polite"
-      >
+      <section className="cf-jobs-preview" aria-label="Pasted job preview" aria-live="polite">
         {preview ? (
           <article className="cf-jobs-card">
             <div className="cf-jobs-card-top">
-              <span className="cf-jobs-badge">
-  	      	{saveMessage ? 'Saved privately' : 'Preview — not saved'}
-	      </span>
-              <span className="cf-jobs-badge cf-jobs-badge--muted">
-                ● Unverified
-              </span>
+              <span className="cf-jobs-badge">Preview — not saved</span>
+              <span className="cf-jobs-badge cf-jobs-badge--muted">● Unverified</span>
             </div>
-
             <h3>{preview.title}</h3>
-
             <p className="cf-jobs-card-meta">
               {preview.company}
               {preview.location ? ` · ${preview.location}` : ''}
               {` · ${JOB_TYPE_LABELS[preview.jobType]} · ${WORK_MODE_LABELS[preview.workMode]}`}
             </p>
-
-            {preview.deadline && (
-              <p className="cf-jobs-card-meta">
-                Deadline (unverified): {preview.deadline}
-              </p>
-            )}
-
-            <p className="cf-jobs-card-description">
-              {preview.description}
-            </p>
-
+            {preview.deadline && <p className="cf-jobs-card-meta">Deadline (unverified): {preview.deadline}</p>}
+            <p className="cf-jobs-card-description">{preview.description}</p>
             {preview.sourceUrl && (
               <p className="cf-jobs-card-source">
-                Source:{' '}
-                <a
-                  href={preview.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {preview.sourceUrl}
-                </a>
+                Source: <a href={preview.sourceUrl} target="_blank" rel="noopener noreferrer">{preview.sourceUrl}</a>
               </p>
             )}
-
             <p className="cf-jobs-card-note">
-              {saveMessage
-                ? 'This job is saved privately to your Career Forge account.'
-                : 'This preview is private and has not been saved yet.'}
+              {savedPosting
+                ? 'Saved as your private import. Opening detail uses the persisted job id (authorized read required).'
+                : 'Parse preview only — not saved. The preview id is not a published job and cannot open on the published detail route.'}
+              {!savedPosting && (
+                <>
+                  {' '}
+                  Use <strong>Save as private job</strong> once import is connected, or open a{' '}
+                  <strong>published opportunity</strong> from the list above for the live detail page.
+                </>
+              )}
             </p>
-
-            <button
-              className="cf-button"
-              type="button"
-              onClick={savePreview}
-              disabled={isSaving || Boolean(saveMessage)}
-            >
-              {isSaving
-                ? 'Saving…'
-                : saveMessage
-                  ? 'Saved privately'
-                  : 'Save privately'}
-            </button>
-
-            {saveMessage && (
-              <p className="cf-profile-status" role="status">
-                {saveMessage}
+            {saveError && (
+              <p className="cf-error" role="alert">{saveError}</p>
+            )}
+            <p className="cf-jobs-example-actions">
+              <button
+                type="button"
+                className="cf-button"
+                disabled={!IS_JOB_PERSISTENCE_AVAILABLE || isSaving || Boolean(savedPosting)}
+                aria-busy={isSaving}
+                aria-describedby="save-private-hint"
+                onClick={onSavePrivate}
+              >
+                {IS_JOB_PERSISTENCE_AVAILABLE
+                  ? (isSaving ? 'Saving...' : 'Save as private job')
+                  : 'Save as private job (not connected)'}
+              </button>
+              <span className="cf-hint" id="save-private-hint">
+                {IS_JOB_PERSISTENCE_AVAILABLE
+                  ? 'Persists a private pasted import for your account.'
+                  : 'Not connected — no request is sent until POST /api/jobs/import and GET /api/jobs/[id] exist.'}
+              </span>
+            </p>
+            {savedPosting && (
+              <p className="cf-jobs-example-actions">
+                <a className="cf-button cf-button--secondary" href={`/jobs/${savedPosting.id}`}>
+                  Open saved private job
+                </a>
               </p>
             )}
           </article>
         ) : (
-          <p className="cf-jobs-empty">
-            Your pasted job will appear here as an unsaved preview after you
-            select “Preview pasted job”.
-          </p>
+          <p className="cf-jobs-empty">Your pasted job will appear here as an unsaved preview after you select “Preview pasted job”.</p>
         )}
       </section>
     </div>

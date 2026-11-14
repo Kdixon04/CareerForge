@@ -1,5 +1,7 @@
 # Steve Rogers — student profile, saved applications, and design
 
+Current integration note (November 14, 2026): main has sign-in and a connected profile loader/save route. Profile fixture mode remains explicitly unsaved; the normal signed-in path needs database and account-isolation verification. PR #17's theme cleanup must preserve the connected save path. Older milestone notes below are historical and do not override current code or the [team handoff](../teammates.md).
+
 Read [AGENTS.md](../AGENTS.md) and the current [team handoff](../teammates.md) before editing. You own the student profile and saved-application experience through the UI and route layer. Keyan owns SQL and supplies user-scoped adapters; Dallas owns scaffold/shared schemas/auth shell and AI/job pages. Report exact cross-person contract or adapter needs to Dallas and the relevant owner in your handoff; do not change another owner's files.
 
 Known skills: English, Spanish, Python, a little Java, Excel; limited database experience; strengths in aesthetics/navigation and team coordination. React/TypeScript experience and availability remain TBD. Pair briefly on your first route; use shared adapters rather than writing migrations.
@@ -17,6 +19,8 @@ First 60–90 minutes:
 4. Build profile form against shared fictional fixtures; connect data when Keyan's first adapters land.
 
 ## Required deliverables
+
+Current separate fixture slice: `/saved` is an explicitly fictional in-memory tracking preview; see [saved UI handoff](../src/app/(student)/saved/HANDOFF.md). It resets on reload and makes no account/API writes. Current main has a connected profile save path; saved-application persistence still needs an authorized adapter and route.
 
 - Both themes, not a stretch: visible accessible toggle, first-visit system preference, remembered theme preference across navigation/reload, readable forms/focus/errors/cards on all feature pages. Local storage may hold theme preference, not personal profile/resume content.
 - Preserve logo artwork/proportions. Use actual prototype for final colors/fonts; provisional warm leather/orange/gold/cream/charcoal is acceptable until it arrives. Keep controls consistent and professional.

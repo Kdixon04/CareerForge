@@ -39,30 +39,31 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       await expect(example.getByText('● Unverified')).toBeVisible();
       await expect(example.getByRole('link', { name: 'https://example.com/jobs/job-001' })).toBeVisible();
 
+      const pasteForm = page.getByRole('form', { name: 'Paste a job description' });
       const preview = page.getByRole('region', { name: 'Pasted job preview' });
       await expect(preview.getByText(/appear here as an unsaved preview/)).toBeVisible();
 
       // Submitting an empty form surfaces validation errors and no preview.
-      await page.getByRole('button', { name: 'Preview pasted job' }).click();
+      await pasteForm.getByRole('button', { name: 'Preview pasted job' }).click();
       await expect(page.getByText('This field is required.').first()).toBeVisible();
-      await expect(page.getByRole('textbox', { name: 'Job title' })).toHaveAttribute('aria-invalid', 'true');
+      await expect(pasteForm.getByRole('textbox', { name: 'Job title' })).toHaveAttribute('aria-invalid', 'true');
       await expect(preview.getByRole('article')).toHaveCount(0);
 
       // A non-https source URL is rejected with a specific message.
-      await page.getByRole('textbox', { name: 'Job title' }).fill('Junior Web Developer');
-      await page.getByRole('textbox', { name: 'Company' }).fill('North Star Labs');
+      await pasteForm.getByRole('textbox', { name: 'Job title' }).fill('Junior Web Developer');
+      await pasteForm.getByRole('textbox', { name: 'Company' }).fill('North Star Labs');
       const xssText = '<img src=x onerror="window.__xss=1"> Build accessible interfaces.';
-      await page.getByRole('textbox', { name: 'Job description' }).fill(xssText);
-      await page.getByRole('textbox', { name: /Source URL/ }).fill('http://insecure.example.com/1');
-      await page.getByRole('button', { name: 'Preview pasted job' }).click();
+      await pasteForm.getByRole('textbox', { name: 'Job description' }).fill(xssText);
+      await pasteForm.getByRole('textbox', { name: /Source URL/ }).fill('http://insecure.example.com/1');
+      await pasteForm.getByRole('button', { name: 'Preview pasted job' }).click();
       await expect(page.getByText('Enter a full https:// URL, or leave it blank.')).toBeVisible();
       await expect(preview.getByRole('article')).toHaveCount(0);
 
       // Fixing the URL produces a safe, clearly-labelled preview.
-      await page.getByRole('textbox', { name: /Source URL/ }).fill('https://example.com/jobs/job-001');
-      await page.getByRole('combobox', { name: 'Job type' }).selectOption('full_time');
-      await page.getByRole('combobox', { name: 'Work arrangement' }).selectOption('on_site');
-      await page.getByRole('button', { name: 'Preview pasted job' }).click();
+      await pasteForm.getByRole('textbox', { name: /Source URL/ }).fill('https://example.com/jobs/job-001');
+      await pasteForm.getByRole('combobox', { name: 'Job type' }).selectOption('full_time');
+      await pasteForm.getByRole('combobox', { name: 'Work arrangement' }).selectOption('on_site');
+      await pasteForm.getByRole('button', { name: 'Preview pasted job' }).click();
 
       const card = preview.getByRole('article');
       await expect(card).toBeVisible();
@@ -77,13 +78,17 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined();
       expect(await page.locator('.cf-jobs-card-description img').count()).toBe(0);
 
-      await expect(card.getByRole('link', { name: 'Continue to job detail (fixture-backed)' })).toBeVisible();
-      await card.getByRole('link', { name: 'Continue to job detail (fixture-backed)' }).click();
-      // Parse route assigns a new preview id; only the fictional example id resolves on detail until import.
-      await expect(page.getByText('No fixture posting matches this id.')).toBeVisible();
-      await page.goto(`/jobs/${EXAMPLE_JOB_ID}`);
+      await expect(
+        page.getByRole('button', { name: 'Save as private job (not connected)' }),
+      ).toBeDisabled();
+      await expect(card.getByText(/Parse preview only — not saved/)).toBeVisible();
+      await expect(card.getByText(/not a published job/)).toBeVisible();
+      await expect(card.getByRole('link', { name: /Try preview id/ })).toHaveCount(0);
+
+      await page.getByRole('link', { name: 'Open example job detail' }).first().click();
+      await page.waitForURL(`**/jobs/${EXAMPLE_JOB_ID}`);
       await expect(page.getByText('Fixture preview — not loaded from the database.')).toBeVisible();
-      await expect(page.getByRole('link', { name: 'Review résumé suggestions' })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Review match', exact: true })).toBeVisible();
 
       // No horizontal overflow and no console/page errors.
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
