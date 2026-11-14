@@ -39,9 +39,19 @@
 .cf-jobs-card-source { overflow-wrap: anywhere; margin: .5rem 0; }
 .cf-jobs-card-source a { color: var(--cf-focus); }
 .cf-jobs-card-note { color: var(--cf-muted); font-size: .85rem; margin: .75rem 0 0; }
+.cf-jobs-filters { border: none; margin: 0 0 1.25rem; padding: 0; min-inline-size: 0; }
+.cf-jobs-filter-legend { font-weight: 700; margin-bottom: .5rem; padding: 0; }
+.cf-jobs-filter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-bottom: .75rem; }
+.cf-jobs-filter-actions { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: center; }
+.cf-jobs-browse-list { display: grid; gap: 1.5rem; margin-top: 1rem; }
+.cf-jobs-browse-card { padding-top: .25rem; border-top: 1px solid var(--cf-border); }
+.cf-jobs-browse-card:first-child { border-top: none; padding-top: 0; }
+.cf-jobs-filter-empty { margin: 1rem 0 0; color: var(--cf-muted); }
+.cf-jobs-text-button { background: none; border: none; color: var(--cf-focus); text-decoration: underline; cursor: pointer; font: inherit; padding: 0; min-height: 44px; }
 
 @media (max-width: 760px) {
   .cf-jobs-shell { width: calc(100% - 2rem); }
   .cf-jobs-grid { grid-template-columns: 1fr; }
   .cf-jobs-row { grid-template-columns: 1fr; }
+  .cf-jobs-filter-grid { grid-template-columns: 1fr; }
 }
