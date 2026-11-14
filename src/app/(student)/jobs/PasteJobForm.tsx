@@ -1,13 +1,13 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import type { JobDraft } from '../../../contracts';
+import type { JobPosting } from '../../../contracts';
+import { submitPasteJob } from '../../../lib/jobs/submit-paste';
 import {
   JOB_TYPE_LABELS,
   JOB_TYPE_OPTIONS,
   WORK_MODE_LABELS,
   WORK_MODE_OPTIONS,
-  parseJobDraft,
   type PasteJobFieldErrors,
   type PasteJobInput,
 } from './paste-job';
@@ -20,10 +20,14 @@ const EMPTY: PasteJobInput = {
 export function PasteJobForm() {
   const [values, setValues] = useState<PasteJobInput>(EMPTY);
   const [errors, setErrors] = useState<PasteJobFieldErrors>({});
-  const [preview, setPreview] = useState<JobDraft | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [preview, setPreview] = useState<JobPosting | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const companyRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const sourceUrlRef = useRef<HTMLInputElement>(null);
+  const deadlineRef = useRef<HTMLInputElement>(null);
 
   const update = (field: keyof PasteJobInput) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -33,17 +37,27 @@ export function PasteJobForm() {
     if (fieldErrors.title) titleRef.current?.focus();
     else if (fieldErrors.company) companyRef.current?.focus();
     else if (fieldErrors.description) descriptionRef.current?.focus();
+    else if (fieldErrors.sourceUrl) sourceUrlRef.current?.focus();
+    else if (fieldErrors.deadline) deadlineRef.current?.focus();
   };
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const result = parseJobDraft(values);
+    setIsSubmitting(true);
+    setServerError(null);
+
+    const result = await submitPasteJob(values);
+    setIsSubmitting(false);
+
     if (result.ok) {
       setErrors({});
-      setPreview(result.draft);
+      setPreview(result.posting);
     } else {
       setPreview(null);
       setErrors(result.errors);
+      if (result.message && !Object.keys(result.errors).length) {
+        setServerError(result.message);
+      }
       focusFirstError(result.errors);
     }
   };
@@ -54,6 +68,10 @@ export function PasteJobForm() {
   return (
     <div className="cf-jobs-grid">
       <form className="cf-jobs-form" aria-label="Paste a job description" noValidate onSubmit={onSubmit}>
+        {serverError && (
+          <p className="cf-error" role="alert" id="server-error">{serverError}</p>
+        )}
+
         <div className="cf-field">
           <label className="cf-label" htmlFor="title">Job title</label>
           <input
@@ -109,7 +127,7 @@ export function PasteJobForm() {
         <div className="cf-field">
           <label className="cf-label" htmlFor="sourceUrl">Source URL <span className="cf-jobs-optional">(optional)</span></label>
           <input
-            id="sourceUrl" name="sourceUrl" className="cf-input" inputMode="url" placeholder="https://"
+            ref={sourceUrlRef} id="sourceUrl" name="sourceUrl" className="cf-input" inputMode="url" placeholder="https://"
             value={values.sourceUrl} onChange={update('sourceUrl')}
             aria-invalid={errors.sourceUrl ? true : undefined} aria-describedby={describedBy('sourceUrl')}
           />
@@ -119,14 +137,16 @@ export function PasteJobForm() {
         <div className="cf-field">
           <label className="cf-label" htmlFor="deadline">Application deadline <span className="cf-jobs-optional">(optional, YYYY-MM-DD)</span></label>
           <input
-            id="deadline" name="deadline" className="cf-input" placeholder="2026-12-01"
+            ref={deadlineRef} id="deadline" name="deadline" className="cf-input" placeholder="2026-12-01"
             value={values.deadline} onChange={update('deadline')}
             aria-invalid={errors.deadline ? true : undefined} aria-describedby={describedBy('deadline')}
           />
           {errors.deadline && <p className="cf-error" id="deadline-error">{errors.deadline}</p>}
         </div>
 
-        <button className="cf-button" type="submit">Preview pasted job</button>
+        <button className="cf-button" type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+          {isSubmitting ? 'Parsing...' : 'Preview pasted job'}
+        </button>
       </form>
 
       <section className="cf-jobs-preview" aria-label="Pasted job preview" aria-live="polite">
