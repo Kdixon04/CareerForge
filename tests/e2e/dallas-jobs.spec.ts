@@ -77,8 +77,11 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined();
       expect(await page.locator('.cf-jobs-card-description img').count()).toBe(0);
 
-      await expect(card.getByRole('link', { name: 'Continue to job detail (fixture-backed)' })).toBeVisible();
-      await card.getByRole('link', { name: 'Continue to job detail (fixture-backed)' }).click();
+      await expect(
+        page.getByRole('button', { name: 'Save as private job (not connected)' }),
+      ).toBeDisabled();
+      await expect(card.getByRole('link', { name: 'Try preview id on detail (may be empty)' })).toBeVisible();
+      await card.getByRole('link', { name: 'Try preview id on detail (may be empty)' }).click();
       // Parse route assigns a new preview id; only the fictional example id resolves on detail until import.
       await expect(page.getByText('No fixture posting matches this id.')).toBeVisible();
       await page.goto(`/jobs/${EXAMPLE_JOB_ID}`);
