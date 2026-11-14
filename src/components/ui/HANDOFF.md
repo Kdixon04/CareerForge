@@ -1,3 +1,5 @@
+Adapter follow-up: [connection mapping](student-data/INTEGRATION.md) documents PR #28 compatibility, checkedAdapter and exact owner/environment decisions; [audit handoff](student-data/DEPENDENCY-AUDIT.md) records the six inherited dev findings. Consumer checks and UI recovery are locally verified; production adapters/routes remain blocked and test doubles remain separate.
+
 # Steve design and profile handoff
 
 ## Current adapter-preparation branch

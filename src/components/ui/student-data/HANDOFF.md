@@ -143,3 +143,35 @@ These are the task's Steve-owned edits, excluding inherited PR #29 and the safe 
 - `src/components/ui/student-data/testing/serve-lab.mjs`
 - `src/components/ui/student-data/testing/steve-adapter-contracts.workflow.yml`
 - `src/components/ui/student-data/testing/verify-contracts.mjs`
+
+## Follow-up checkpoint — boundary review at 367cd4f
+
+Current contract tests include a reusable checkedAdapter boundary, pre-write identity/shape checks, input schemas, exact result application/job identity, duplicate application rejection, fixed delete acknowledgements and stable subject checks. HTTP factories reject method/query ambiguity and keep every success/error private/no-store. The local transport reuses that boundary. A/B readiness now accepts only explicit publishable-key format and rejects case/whitespace aliases for the same fictional email. Application-load errors receive focus and retry to an empty list safely.
+
+Regression tests were first observed failing for missing pre-write identity validation, wrong-record responses, ambiguous requests, unsafe readiness and missing error focus; all now pass. No existing tests/skips were weakened. See [exact connection/foundation mapping](INTEGRATION.md) and [package-by-package audit handoff](DEPENDENCY-AUDIT.md). These supersede older counts/notes above without erasing historical evidence.
+
+Latest local results: npm ci PASS; typecheck PASS; npm test **89 tests / 17 files PASS**; verify-contracts.mjs **24 PASS** (subset); production build PASS; normal Chromium smoke **56 PASS, 6 existing fixture skips**; explicit memory lab **9 PASS** at phone/desktop/light/dark; existing profile harness **7/7 PASS**. Manual browser confirmed application load-error focus/retry, profile save/reload in memory, failed application update retaining draft, reset and removal focus/empty state. Secretlint and production audit PASS; full audit remains the inherited 6 findings documented separately. actionlint 1.7.12 -shellcheck= -pyflakes= passes for existing .github/workflows/ci.yml and the owned proposal. Active workflow/package/lockfile/shared AGENTS and production route wiring remain unchanged. Production build bundles contain no lab markers. Real adapter/Auth/RLS/durability/live A/B/deployment remain NOT RUN.
+
+The new PR is preparation/scaffolding only, includes inherited PR #29 fixture files because that PR is still unmerged, and targets main so ordinary CI triggers. It does not update either protected PR/branch. Hosted CI status must be read from the new PR's exact head; deployment is not verified by CI. Owner decisions and unresolved dependencies remain in INTEGRATION.md. Full assignment is not complete.
+
+### Exact follow-up file inventory
+
+- `assignments/steve-rogers.md`
+- `src/app/api/applications/adapter-handlers.ts`
+- `src/app/api/profile/adapter-handlers.ts`
+- `src/components/ui/HANDOFF.md`
+- `src/components/ui/student-data/AdapterEditors.tsx`
+- `src/components/ui/student-data/checked-adapter.ts`
+- `src/components/ui/student-data/DEPENDENCY-AUDIT.md`
+- `src/components/ui/student-data/HANDOFF.md`
+- `src/components/ui/student-data/http-boundary.ts`
+- `src/components/ui/student-data/INTEGRATION.md`
+- `src/components/ui/student-data/readiness.ts`
+- `src/components/ui/student-data/testing/boundary-regression.test.ts`
+- `src/components/ui/student-data/testing/browser.lab.ts`
+- `src/components/ui/student-data/testing/checked-adapter.test.ts`
+- `src/components/ui/student-data/testing/http-boundary.test.ts`
+- `src/components/ui/student-data/testing/lab-transport.ts`
+- `src/components/ui/student-data/testing/readiness.test.ts`
+- `src/components/ui/student-data/testing/steve-adapter-contracts.workflow.yml`
+- `src/components/ui/student-data/testing/verify-contracts.mjs`
