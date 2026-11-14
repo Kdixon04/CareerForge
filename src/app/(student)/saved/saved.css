@@ -1,0 +1,6 @@
+.cf-saved-header { flex-wrap: wrap; }
+.cf-saved-fields { display: grid; gap: 1rem; min-width: 0; }
+.cf-saved-badges { display: flex; flex-wrap: wrap; gap: .5rem; margin: .75rem 0; }
+.cf-badge { display: inline-flex; padding: .2rem .65rem; border: 1px solid var(--cf-border); border-radius: 1rem; background: var(--cf-subtle); color: var(--cf-text); font-size: .85rem; font-weight: 650; }
+.cf-saved main a { color: var(--cf-leather); text-underline-offset: .2em; }
+.cf-saved main a:focus-visible { outline: 3px solid var(--cf-focus); outline-offset: 3px; }

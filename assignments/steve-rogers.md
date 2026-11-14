@@ -18,6 +18,8 @@ First 60–90 minutes:
 
 ## Required deliverables
 
+Current separate fixture slice: `/saved` is an explicitly fictional in-memory tracking preview; see [saved UI handoff](../src/app/(student)/saved/HANDOFF.md). It intentionally resets on reload and makes no account/API writes. Theme PR #17 is independently green at 38336c7. Real profile/application wiring still waits for verified Keyan/Dallas adapters.
+
 - Both themes, not a stretch: visible accessible toggle, first-visit system preference, remembered theme preference across navigation/reload, readable forms/focus/errors/cards on all feature pages. Local storage may hold theme preference, not personal profile/resume content.
 - Preserve logo artwork/proportions. Use actual prototype for final colors/fonts; provisional warm leather/orange/gold/cream/charcoal is acceptable until it arrives. Keep controls consistent and professional.
 - Reusable Button/Input/Textarea/Card/Badge and navigation; avoid decorative complexity. Enabled buttons keyboard reachable, disabled native buttons non-activatable. Do not require disabled native controls to be focusable.

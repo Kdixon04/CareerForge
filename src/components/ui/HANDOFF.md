@@ -2,7 +2,7 @@
 
 ## State and boundaries
 
-CareerForge main has the Next.js 15/React 18 scaffold, provisional [contracts](../../contracts/) and [fictional examples](../../data/examples.ts). This branch adds light/dark theme components, navigation, Button/Input/Textarea and a real `/profile` route backed by fictional data. Its form supports editable facts and validation; **Save profile is disabled** until Keyan supplies a verified, user-scoped adapter. Reload discards edits. There is no real auth, saved-application route, persistence or AI flow here. The port-4317 component harness is a separate fixture; its `/saved` page is only an empty-state example.
+CareerForge main has the Next.js 15/React 18 scaffold, provisional [contracts](../../contracts/) and [fictional examples](../../data/examples.ts). This branch adds light/dark theme components, navigation, Button/Input/Textarea and a real `/profile` route backed by fictional data. Its form supports editable facts and validation; **Save profile is disabled** until Keyan supplies a verified, user-scoped adapter. Reload discards edits. There is no real auth, database persistence or live AI flow here. This branch adds an explicitly fictional, in-memory `/saved` tracking preview; see the [saved UI handoff](../../app/(student)/saved/HANDOFF.md) for current tests and backend blockers. The port-4317 component harness is a separate fixture; its `/saved` page is only an empty-state example.
 
 Current main's `AGENTS.md` is the shared rule source. This branch removes the displaced `AGENTS.reference.md` and keeps Steve's assigned component/profile work.
 
