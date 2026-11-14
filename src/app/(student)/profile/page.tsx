@@ -6,6 +6,8 @@ import '../../../styles/tokens.css';
 import '../../../styles/components.css';
 import './profile.css';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProfilePage() {
   const supabase = await createSupabaseServerClient();
 
