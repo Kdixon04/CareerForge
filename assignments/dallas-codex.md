@@ -1,5 +1,9 @@
 # Dallas / Codex
 
+> **Status: paused.** Codex credits are temporarily unavailable.
+> Tasks listed here will resume in a future Codex session.
+> Nothing here is assigned to Cursor or Antigravity.
+
 Read [shared rules](../AGENTS.md), [team handoff](../teammates.md), [Dallas's assignment](dallas.md), and the [tool split](dallas-agent-coordination.md). This is a slice of Dallas's ownership only.
 
 **Exclusive paths among Dallas tools:** `src/contracts/**`; `package.json` and `package-lock.json`; Dallas-owned framework/test/CI configuration; `src/app/layout.tsx` and `src/app/page.tsx`; `tests/e2e/dallas-*.spec.ts` and `tests/unit/dallas-*.test.ts`. Dallas uses Codex for shared coordination docs and integration changes after agreeing the exact edit. Cursor and Antigravity request contract/dependency changes instead of writing them.

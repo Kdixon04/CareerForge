@@ -12,6 +12,8 @@ Start with the short task brief for your tool: [Codex](dallas-codex.md), [Cursor
 
 Codex alone changes `src/contracts/**`, `package.json`, and the lockfile among these three tools. Cursor and Antigravity request an exact schema/dependency change from Dallas; they do not edit those files. Each tool uses its own branch and worktree from current CareerForge `main`. One writer per file at a time; announce a precise handoff before changing writers. Ask Keyan for adapter signatures and Steve for shared UI/theme props rather than editing their paths.
 
+**The Codex slice is currently paused** (Codex credits are temporarily unavailable), so its tasks — shared contracts, the Zod advisory, and integration tests — are on hold and are **not** being picked up by Cursor or Antigravity; see [dallas-codex.md](dallas-codex.md).
+
 ## First slices and integration
 
 1. **Codex:** integrate Steve's existing theme/navigation in the root shell and test it in the actual app; resolve the Zod advisory and revalidate contracts before external request parsing.
