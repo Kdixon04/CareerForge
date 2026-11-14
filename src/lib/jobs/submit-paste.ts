@@ -12,14 +12,10 @@ export const PARSE_JOB_ROUTE = '/api/jobs/parse';
 /**
  * Flag indicating whether PR #18 (POST /api/jobs/parse) has been merged into main.
  *
- * - When false: in-browser calls build against the contract-compliant fixture
- *   JobPosting shape, preventing 404 console errors during e2e tests.
- * - When true (or when a custom fetch function is supplied, e.g. in tests):
- *   the real HTTP POST to `/api/jobs/parse` is executed.
- *
- * Switch to true once PR #18 is merged into main.
+ * The server parse route is now merged into main, so production calls use the
+ * authenticated route. Tests can still supply a custom fetch implementation.
  */
-export const IS_PARSE_ROUTE_MERGED = false;
+export const IS_PARSE_ROUTE_MERGED = true;
 
 export type SubmitPasteResult =
   | { ok: true; posting: JobPosting }
@@ -39,16 +35,10 @@ function friendlyMessage(issue: z.ZodIssue): string {
  * Submits a pasted job description to the server for parsing and validation,
  * returning a validated JobPosting object or structured errors.
  *
- * REAL CALL LOCATION:
- * Once PR #18 merges into main, this function directs all production calls to
- * `fetch(PARSE_JOB_ROUTE, { method: 'POST', body: ... })`.
- *
- * Current behavior:
- * 1. Pre-fetch size validation: rejects text > 20,000 chars before network call.
- * 2. If `customFetch` is supplied or `IS_PARSE_ROUTE_MERGED` is true, sends
- *    POST to `/api/jobs/parse` and verifies the returned `JobPosting`.
- * 3. While PR #18 is pending merge, builds against the fixture `JobPosting` shape
- *    so the UI is fully functional and Playwright tests pass without 404s.
+ * Production calls POST to `/api/jobs/parse` and verify the returned
+ * `JobPosting`. Tests may provide `customFetch` to exercise the response path.
+ * The route currently returns a validated, non-persisted preview; persistence is
+ * added by the authenticated data adapter integration.
  */
 export async function submitPasteJob(
   input: PasteJobInput,
