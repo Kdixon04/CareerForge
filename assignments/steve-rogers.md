@@ -47,3 +47,5 @@ Report task/files/checks/browser themes+widths/security findings/blockers/next. 
 
 Stretch after both themes/core persistence: Spanish strings if team wants them, small skeleton polish, calendar export UI with explicitly agreed date behavior.
 
+
+Confirmed with Steve: explain as we go; use CareerForge.webp colors. Submission: November 14, 2026, 4 p.m. America/Denver; ready by 3:30 p.m. Profile → job → résumé edits → saved application is the confirmed demo. Broader scope does not authorize extra features. No prototype available. First build plan awaits Steve's go.
