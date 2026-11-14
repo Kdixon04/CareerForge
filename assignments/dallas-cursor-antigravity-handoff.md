@@ -110,5 +110,6 @@ Match review (`/match/[id]`) remains **fixture-only** until résumé routes land
 - **#42** published-jobs client-side filters merged (keyword/type/work-mode on the already-loaded list; no search/Claude claim).
 - **#40** private-job handler logic merged (fail-closed, routes pending).
 - **#35** (Steve adapter prep) left as DRAFT — not integrated.
+- **STRETCH — Internship Prep Hub** (`/jobs/[id]/prep`): fixture-first, inert (`IS_PREP_LIVE = false`), clearly labeled preview — buzzwords, two-view interview questions, fictional demo contacts, unverified news. UI + view logic + Playwright on `dallas/cursor-stretch-prep-hub`. Spec/ownership: [stretch-prep-hub.md](stretch-prep-hub.md). Antigravity owns the matching `src/app/api/prep/**` routes. **Core-at-12 preempts this.**
 
 Requested by: Cursor, 2026-11-14

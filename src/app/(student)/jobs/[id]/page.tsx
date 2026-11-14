@@ -114,6 +114,9 @@ function KnownJobDetail({
             Review résumé suggestions
           </a>
         )}
+        <a className="cf-button cf-button--secondary" href={`/jobs/${job.id}/prep`}>
+          Prep for this role (preview)
+        </a>
         <a className="cf-button cf-button--secondary" href="/jobs">
           Back to jobs
         </a>
