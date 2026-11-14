@@ -9,6 +9,9 @@ import { addFact, removeFact, updateFact, validateProfileDraft, PROFILE_LIMITS, 
 
 export type ProfileFormProps = {
   initialProfile: StudentProfile;
+  onDirtyChange?: (dirty: boolean) => void;
+  saveLabel?: string;
+  savedMessage?: string;
   // Component callback, not a new API contract. Adapter wiring awaits Keyan/Dallas.
   onSave?: (draft: ProfileDraft, expectedUpdatedAt: string) => Promise<StudentProfile>;
 };
@@ -18,12 +21,16 @@ const factKinds: { kind: StudentFact['kind']; label: string }[] = [
 ];
 const editable = (profile: StudentProfile): ProfileDraft => ({ displayName: profile.displayName, field: profile.field, facts: profile.facts.map(fact => ({ ...fact })) });
 
-export function ProfileForm({ initialProfile, onSave }: ProfileFormProps) {
+export function ProfileForm({ initialProfile, onSave, onDirtyChange, saveLabel = 'Save profile', savedMessage = 'Profile saved.' }: ProfileFormProps) {
   const [draft, setDraft] = useState(() => editable(initialProfile));
   const [version, setVersion] = useState(initialProfile.updatedAt);
+  const [baseline, setBaseline] = useState(() => JSON.stringify(editable(initialProfile)));
+  useEffect(() => { onDirtyChange?.(JSON.stringify(draft) !== baseline); }, [draft, baseline, onDirtyChange]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState('');
   const [saveError, setSaveError] = useState('');
+  const saveErrorRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (saveError) saveErrorRef.current?.focus(); }, [saveError]);
   const [saving, setSaving] = useState(false);
   const savingRef = useRef(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -62,11 +69,15 @@ export function ProfileForm({ initialProfile, onSave }: ProfileFormProps) {
     savingRef.current = true; setSaving(true);
     try {
       const saved = await onSave(result.data, version);
-      setDraft(editable(saved)); setVersion(saved.updatedAt);
-      setStatus('Profile saved.');
+      setDraft(editable(saved)); setBaseline(JSON.stringify(editable(saved))); setVersion(saved.updatedAt);
+      setStatus(savedMessage);
     } catch (error) {
       setSaveError(error instanceof ProfileSaveError && error.code === 'conflict'
         ? 'Your profile changed elsewhere. Your edits are still here. Copy them before reloading the latest version.'
+        : error instanceof ProfileSaveError && error.code === 'unauthenticated' ? 'Your session expired. Your edits are still here. Sign in again before retrying.'
+        : error instanceof ProfileSaveError && error.code === 'forbidden' ? 'Your account cannot save this profile. Your edits are still here.'
+        : error instanceof ProfileSaveError && error.code === 'validation' ? 'The adapter rejected these entries. Check them and retry; your edits are still here.'
+        : error instanceof ProfileSaveError && error.code === 'network' ? 'Connection failed. Your edits are still here. Retry when connected.'
         : 'Could not save your profile. Your edits are still here. Try again.');
     } finally { savingRef.current = false; setSaving(false); }
   }
@@ -92,7 +103,7 @@ export function ProfileForm({ initialProfile, onSave }: ProfileFormProps) {
               changed(removeFact(draft, fact.id));
               requestAnimationFrame(() => document.getElementById('profile-add-skill')?.focus());
             }}>Remove</Button></div>
-            <Textarea id={`fact-${fact.id}-text`} label={`What you did — entry ${index + 1}`} rows={3} maxLength={PROFILE_LIMITS.totalFactCharacters} value={fact.text} error={errors[`facts.${index}.text`]} required onChange={event => changed(updateFact(draft, fact.id, { text: event.target.value }))} />
+            <Textarea id={`fact-${fact.id}-text`} label={`What you did — entry ${index + 1}`} rows={3} maxLength={PROFILE_LIMITS.factText} value={fact.text} error={errors[`facts.${index}.text`]} required onChange={event => changed(updateFact(draft, fact.id, { text: event.target.value }))} />
             <div className="cf-profile-grid">
               <Input label={`Organization — entry ${index + 1}`} maxLength={PROFILE_LIMITS.organization} value={fact.org ?? ''} hint="Optional. School, employer or group." error={errors[`facts.${index}.org`]} onChange={event => changed(updateFact(draft, fact.id, { org: event.target.value }))} />
               <Input label={`Dates — entry ${index + 1}`} maxLength={PROFILE_LIMITS.dates} value={fact.dates ?? ''} placeholder="e.g. Fall 2026" hint="Optional. Use dates you know." error={errors[`facts.${index}.dates`]} onChange={event => changed(updateFact(draft, fact.id, { dates: event.target.value }))} />
@@ -105,11 +116,11 @@ export function ProfileForm({ initialProfile, onSave }: ProfileFormProps) {
       </section>
       <div className="cf-profile-save">
         {!onSave && <Button type="submit">Check profile</Button>}
-        <Button type={onSave ? 'submit' : 'button'} disabled={!onSave} loading={saving}>{saving ? 'Saving…' : 'Save profile'}</Button>
+        <Button type={onSave ? 'submit' : 'button'} disabled={!onSave} loading={saving}>{saving ? 'Saving…' : saveLabel}</Button>
         {!onSave && <p className="cf-hint">Saving is unavailable until the secure profile adapter is connected. Reloading resets this fictional preview.</p>}
       </div>
     </fieldset>
-    {saveError && <p className="cf-profile-alert" role="alert">{saveError}</p>}
+    {saveError && <p ref={saveErrorRef} tabIndex={-1} className="cf-profile-alert" role="alert">{saveError}</p>}
     <p className="cf-profile-status" role="status" aria-live="polite">{status}</p>
   </form>;
 }

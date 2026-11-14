@@ -4,6 +4,9 @@ Current integration note (November 14, 2026): main has sign-in, a connected `/pr
 
 Branch: `feature/steve-saved-preview`, PR #29, synced with main `a64f637`. The intervening main changes after the locally tested `8964410` base are documentation only. Theme PR #17 is separate: code checkpoint `38336c7` passed CI run 43589998919; its later documentation-only main sync is `c9ac840` (see current PR checks). Only Steve-owned source, tests and handoffs change. Full shared AGENTS.md, contracts, packages, auth clients, adapters and SQL are unchanged.
 
+## New preparation branch (separate from PR #29)
+
+See [adapter handoff](../../../components/ui/student-data/HANDOFF.md) for the newer integration preparation. This public /saved screen still discards edits on reload and never writes accounts. A separate opt-in loopback lab now exercises the injected application interface using process memory only; that is not production persistence, Auth/RLS or live A/B verification. Main gained auth/profile code after this fixture checkpoint, but its sequential PATCH is not an atomic data adapter. PR #29 itself remains untouched.
 ## What works locally
 
 `/saved` is explicitly a fictional, in-memory design preview. It shows three fictional examples: available summary, paused/inactive summary and unavailable placeholder. Status, personal reminder and notes can be checked/updated within the page; removal reaches an empty state and resetting restores the examples. Reload intentionally discards edits. No API request, sign-in, application submission, account data or persistence is involved. No private data is stored in localStorage; only the shared theme preference is allowed.

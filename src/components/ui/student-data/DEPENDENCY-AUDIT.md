@@ -1,0 +1,20 @@
+# Inherited dependency audit — 2026-11-14
+
+Owner/action: Dallas owns package.json, package-lock.json and test/runtime configuration. Steve changed none of these. npm ci reinstalled the committed tree successfully. npm audit --omit=dev --audit-level=moderate reports **0**. Full npm audit --audit-level=moderate fails with **6 affected development packages: 3 moderate, 1 high, 2 critical**. These are affected package counts, not six individual advisory IDs. All are inherited through direct vitest@2.1.3.
+
+| Installed package | Audit severity | Chain / actual advisory evidence | Required owner action |
+|---|---|---|---|
+| vitest 2.1.3 | Critical | Direct dev dependency; GHSA-9crc-q9x8-hgqq (API-server RCE), GHSA-5xrq-8626-4rwp (UI-server arbitrary read/execute); mocker/tinypool/Vite also propagate | Dallas: select a currently patched compatible Vitest line; the first advisory fixes in 2.1.9, but that alone does not cover later advisories |
+| @vitest/mocker 2.1.3 | Moderate | vitest -> mocker; GHSA-82fw-gwwq-j7x9 path traversal, GHSA-qxg6-89mg-rqv8 manual-mock code injection; audit ranges reach <4.1.12 | Dallas: update coordinated Vitest/mocker versions beyond applicable current advisory ranges, verify mocking/browser tests |
+| tinypool 1.1.1 | Critical | vitest -> tinypool; GHSA-5gmw-xhrv-c9v3 and GHSA-85c8-ppgw-ccpr prototype-pollution/RCE gadgets; latter affects <2.1.2 | Dallas: coordinated Vitest pool upgrade, verify Node engines/worker behavior; do not force incompatible transitive override |
+| vite 5.4.21 | High | vitest/mocker/vite-node -> vite; GHSA-587h-7wmj-h5pm Windows editor command execution plus path/FS/launch-editor advisories; reported affected range <=6.4.3 | Dallas: update test dependency chain beyond applicable patched ranges; validate Windows and Linux behavior |
+| vite-node 2.1.3 | Moderate | vitest -> vite-node -> vite; inherited Vite findings | Dallas: coordinated Vitest/vite-node/Vite versions, rerun all unit/contract suites |
+| esbuild 0.21.5 | Moderate | vite -> esbuild; GHSA-67mh-4wv8-2f99 development-server cross-origin reads; affects <=0.24.2 | Dallas: resolve through compatible Vite upgrade; rerun Steve's SSR/hydration lab and existing component harness which use build API |
+
+Evidence: current npm audit --json and npm ls vitest @vitest/mocker vite vite-node esbuild tinypool. Advisory pages are https://github.com/advisories/<ID> for the IDs above. npm's fixAvailable currently suggests vitest 2.1.9 even while its full advisory ranges describe later fixes; do not treat that suggestion as a complete remediation. Re-audit the actual resolved lockfile, not just a requested version. Package registry/security data changes; this report records this run only.
+
+No safe manifest/lockfile remediation lies within Steve's owned paths. An override or npm audit fix --force here would take Dallas's package/config ownership and risk changing runner/pool/Vite APIs. Steve's scoped mitigation is to use vitest run, not a Vitest API/UI/watch server, and use esbuild build(), not its dev server. The loopback lab remains explicitly test-only and uses fictional data. These practices do not remove vulnerabilities or make a full audit pass.
+
+Dallas's next action: update the direct test stack in a dedicated dependency PR, confirm Node/CI/Vercel engine decisions, regenerate lockfile with npm, run install/typecheck/unit/contracts/build/normal smoke/lab/profile harness on the resolved tree, rerun both audits and Secretlint, retain the full-audit CI gate. Request Steve's UI harness support if upgrading esbuild/Vite changes bundling. Do not silently mix dependency remediation into the adapter preparation PR.
+
+Reinspection for production-guard follow-up after main fc9efcd: npm ci and both audit commands reproduce the same installed test stack, six development package severities and fixAvailable=vitest 2.1.9 suggestion described above. Production audit remains zero. No manifest/lockfile update or audit suppression was performed; all package fixes remain Dallas-owned.

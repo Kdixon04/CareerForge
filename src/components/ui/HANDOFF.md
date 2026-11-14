@@ -1,4 +1,10 @@
+Adapter follow-up: [connection mapping](student-data/INTEGRATION.md) documents PR #28 compatibility, checkedAdapter and exact owner/environment decisions; [audit handoff](student-data/DEPENDENCY-AUDIT.md) records the six inherited dev findings. Consumer checks and UI recovery are locally verified; production adapters/routes remain blocked and test doubles remain separate.
+
 # Steve design and profile handoff
+
+## Current adapter-preparation branch
+
+The [adapter preparation handoff](student-data/HANDOFF.md) supersedes historical backend/status claims below on feature/steve-adapter-preparation. Main now has auth clients and a sequential profile PATCH, but it is not the approved atomic adapter. New local consumer interfaces/handler factories, injectable UI and an opt-in memory-only lab are prepared; production persistence/security/A-B verification remain blocked. PR #17 and PR #29 were not modified. CI contract assertions join existing test discovery; active lab/scanner workflow changes await Dallas approval. The six inherited dev audit findings remain explicit; production audit is clean.
 
 Current integration note (November 14, 2026): main has sign-in, a connected `/profile` loader and `/api/profile` save route, and published-job browsing. Fictional profile mode runs only with `CAREERFORGE_E2E_PROFILE_FIXTURE=1`; it disables saving and resets edits on reload. The normal signed-in route needs separate database and two-account verification. PR #17's theme change removes the redundant profile `ThemeProvider` while preserving connected saving; its new navigation test runs in fixture mode and does not prove persistence. Private pasted-job saving and the live résumé journey remain unavailable. Zod is 4.6.6. Older milestone notes below are historical; check current code and CI before relying on their status.
 
