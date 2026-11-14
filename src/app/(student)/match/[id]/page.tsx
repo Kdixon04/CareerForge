@@ -39,15 +39,17 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
   return (
     <div className="cf-match">
-      <a className="cf-skip" href="#match-main">Skip to content</a>
       <div className="cf-match-shell">
-        <header className="cf-match-header">
-          <a href="/" className="cf-match-brand">Career Forge</a>
-          {bundle && (
-            <a href={`/jobs/${bundle.job.id}`} className="cf-match-back" aria-label="Back to job detail">← Back to job detail</a>
-          )}
-        </header>
-        <main id="match-main" tabIndex={-1}>
+        <main id="main" tabIndex={-1}>
+          <p style={{ margin: '0 0 1.5rem' }}>
+            <a
+              href={bundle ? `/jobs/${bundle.job.id}` : '/jobs'}
+              className="cf-match-back"
+              aria-label="Back to job detail"
+            >
+              ← Back to job detail
+            </a>
+          </p>
           {bundle ? <KnownMatch bundle={bundle} /> : <MissingMatch id={id} />}
         </main>
       </div>

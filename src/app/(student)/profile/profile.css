@@ -1,6 +1,6 @@
 .cf-profile { min-height: 100vh; background: var(--cf-bg); color: var(--cf-text); font-family: var(--cf-font); line-height: 1.6; }
 .cf-profile *, .cf-profile *::before, .cf-profile *::after { box-sizing: border-box; }
-.cf-profile-shell { width: min(920px, calc(100% - 3rem)); margin: 0 auto; padding-bottom: 3rem; }
+.cf-profile-shell { width: min(920px, calc(100% - 3rem)); margin: 0 auto; padding: 1.5rem 0 3rem; }
 .cf-profile-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.5rem 0; border-bottom: 1px solid var(--cf-border); margin-bottom: 2.5rem; }
 .cf-profile-brand { color: var(--cf-text); text-decoration: none; font-size: 1.25rem; font-weight: 750; letter-spacing: -.035em; }
 .cf-profile-brand:focus-visible { outline: 3px solid var(--cf-focus); outline-offset: 4px; }
