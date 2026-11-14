@@ -74,10 +74,9 @@ function KnownJobDetail({ job }: { job: NonNullable<ReturnType<typeof findFixtur
       <section className="cf-jobs-next" aria-label="Next steps">
         <h2>Next steps</h2>
         <p className="cf-jobs-card-note">
-          Résumé suggestion review is not on this page yet. The match/review screen is the next Cursor
-          slice and will use this job id once Antigravity supplies suggest/read/edit routes. Nothing here
-          was saved or sent to an AI service.
+          Review fictional suggestion bullets against your profile snapshot. Nothing here is saved or sent to an AI service.
         </p>
+        <a className="cf-button" href={`/match/${job.id}`}>Review résumé suggestions</a>
         <a className="cf-button cf-button--secondary" href="/jobs">Paste another job</a>
       </section>
     </>
