@@ -30,7 +30,13 @@ From the internship detail at `/jobs/[id]`, a clearly-labeled **"Prep for this r
 | Area | Owner | Paths |
 |------|-------|-------|
 | Prep hub UI, fixtures, view logic, tests | **Cursor** | `src/app/(student)/jobs/[id]/prep/**`, `src/app/(student)/jobs/prep-hub.ts`, `src/app/(student)/jobs/fixture-prep-hub.ts`, `tests/e2e/dallas-prep-hub.spec.ts` |
-| Generation routes + Claude logic (inert/fail-closed, mocked tests) | **Antigravity** | `src/app/api/prep/**`, `src/lib/claude/*` |
+| Generation routes + Claude logic (inert/fail-closed, mocked tests) | **Antigravity** | `src/app/api/prep/**`, `src/lib/claude/prep-*.ts` (questions, buzzwords, news only) |
+
+**Anti-collision (Antigravity ↔ Cursor):**
+- **Connect / contacts:** Cursor **only** — fictional demo contacts live in the UI fixture (`PrepBundle.contacts`). Antigravity must **not** add a real-data or outreach `/api/prep/contacts` route. If a placeholder endpoint exists for tests, it must return clearly fictional sample rows and perform no messaging; delete it if redundant.
+- **Interview questions UI:** Cursor renders `PrepBundle.questions` and the two views; Antigravity generates the same shape server-side.
+- **News:** Antigravity `GET /api/prep/news` (provider-gated); Cursor displays items labeled unverified; no fabricated headlines in UI when provider is off.
+- **E2E:** routine Dallas prep UI tests are Cursor-owned (`dallas-prep-hub.spec.ts`). Antigravity may add **guarded** live prep smokes (`test.skip` without keys) in a clearly named file; must not block CI.
 
 UI consumes the shared `PrepBundle` fixture now; routes will produce the same shape later behind a gate (`IS_PREP_LIVE`). No second search-enable flag — news reuses the single `JOB_SEARCH_PROVIDER` selector.
 
