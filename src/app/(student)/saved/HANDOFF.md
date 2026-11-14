@@ -1,6 +1,6 @@
 # Steve — saved-application fixture UI handoff
 
-Branch: `feature/steve-saved-preview`, based on main `8964410`. Separate from theme PR #17 (head `38336c7`, CI run 43589998919 green). Only Steve-owned source, tests and handoffs change. Full shared AGENTS.md, contracts, packages, auth clients, adapters and SQL are unchanged.
+Branch: `feature/steve-saved-preview`, PR #29, synced with main `a64f637`. The intervening main changes after the locally tested `8964410` base are documentation only. Theme PR #17 is separate: code checkpoint `38336c7` passed CI run 43589998919; its later documentation-only main sync is `c9ac840` (see current PR checks). Only Steve-owned source, tests and handoffs change. Full shared AGENTS.md, contracts, packages, auth clients, adapters and SQL are unchanged.
 
 ## What works locally
 
@@ -22,10 +22,12 @@ Files: this folder's page.tsx, SavedApplicationsPreview.tsx, preview-model.ts, p
 
 ## Backend blocker and exact requested boundary
 
-Keyan/Dallas request: https://github.com/Kdixon04/CareerForge/pull/17#issuecomment-6876595298 . Main at this checkpoint has database migrations/security notes but no src/lib/supabase or src/lib/data implementations. During implementation Keyan opened PR #28 at 1693c90, foundation only: `createSupabaseBrowserClient()` in src/lib/supabase/client.ts and async `createSupabaseServerClient()` in src/lib/supabase/server.ts. Its CI was still running when inspected. It adds no authentication UI or src/lib/data atomic profile/application adapter, so it is not yet the authorized persistence boundary required for wiring. Keyan's applied-schema checks are owner-reported; Steve did not rerun hosted security tests.
+Keyan/Dallas request: https://github.com/Kdixon04/CareerForge/pull/17#issuecomment-6876595298 . Main at this checkpoint has database migrations/security notes but no src/lib/supabase or src/lib/data implementations. During implementation Keyan opened PR #28 at 1693c90, foundation only: `createSupabaseBrowserClient()` in src/lib/supabase/client.ts and async `createSupabaseServerClient()` in src/lib/supabase/server.ts. Its foundation CI subsequently passed (run 43590835555); this is build/test evidence, not hosted session or database verification. It adds no authentication UI or src/lib/data atomic profile/application adapter, so it is not yet the authorized persistence boundary required for wiring. Keyan's applied-schema checks are owner-reported; Steve did not rerun hosted security tests.
 
 Needed exports/import paths and verified branch/commit: browser/server Supabase clients, caller verification/session context, getOwnProfile, atomic saveOwnProfile with expected version/returned updatedAt and conflict/foreign-fact error mapping; listOwnApplications, saveApplication(jobId), updateApplication(id,{status?,deadline?,notes?}), removeApplication(id), plus authorized job summaries for paused and hidden content. Existing profile UI callback: onSave(draft: ProfileDraft, expectedUpdatedAt: string): Promise<StudentProfile>; this is a UI boundary, not a new shared contract. Ask Dallas to approve the adapter/API mapping and dependency/auth-shell readiness. Credentials stay out of Git/chat.
 
 Next slice: once authorized adapters and fictional A/B sessions exist, wire Steve's own profile GET/PUT/UI in a small PR and verify save/reload plus second-user denial against the actual database. Then replace saved fixtures with authorized application data and add API errors/loading/auth-required handling. Do not silently use fixtures as a fallback for failed account reads, treat this preview as persisted, or create competing SQL/contracts/adapters.
 
 Current main CI 8964410 is green; no main functional failure was reproduced. Inherited npm audit findings (7 total: 3 moderate, 2 high, 2 critical) remain Dallas-owned; PR #23 addresses Zod. CI does not run audit. Existing main and this preview are not claimed security-clean or deployed.
+
+Current PR checks: https://github.com/Kdixon04/CareerForge/pull/29/checks . Documentation-only follow-ups do not alter the tested UI code. Exact final heads/results are reported in GitHub rather than implying an earlier checkpoint is the current head.
