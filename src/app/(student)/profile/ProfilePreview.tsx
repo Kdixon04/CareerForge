@@ -29,7 +29,13 @@ async function saveProfile(draft: ProfileDraft, expectedUpdatedAt: string): Prom
   return parsed.data;
 }
 
-export function ProfilePreview({ initialProfile }: { initialProfile: StudentProfile }) {
+export function ProfilePreview({
+  initialProfile,
+  fixtureMode = false,
+}: {
+  initialProfile: StudentProfile;
+  fixtureMode?: boolean;
+}) {
   return (
     <ThemeProvider>
       <div className="cf-profile">
@@ -48,15 +54,34 @@ export function ProfilePreview({ initialProfile }: { initialProfile: StudentProf
               Build a picture of what you know, what you have done and where you want to go.
             </p>
 
-            <aside className="cf-profile-notice" aria-label="Profile status">
-              <strong>Connected profile</strong>
-              <p>
-                This profile is loaded from your Career Forge account. Changes save securely
-                to your account. No profile text is sent to an AI service.
-              </p>
+            <aside
+              className="cf-profile-notice"
+              aria-label={fixtureMode ? 'Preview limitations' : 'Profile status'}
+            >
+              {fixtureMode ? (
+                <>
+                  <strong>Fictional profile preview</strong>
+                  <p>
+                    You are editing Maya Chen&apos;s sample profile. Changes stay on this page
+                    and reset on reload. Sign-in and secure saving are not connected yet. No
+                    profile text is sent to an AI service.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <strong>Connected profile</strong>
+                  <p>
+                    This profile is loaded from your Career Forge account. Changes save securely
+                    to your account. No profile text is sent to an AI service.
+                  </p>
+                </>
+              )}
             </aside>
 
-            <ProfileForm initialProfile={initialProfile} onSave={saveProfile} />
+            <ProfileForm
+              initialProfile={initialProfile}
+              onSave={fixtureMode ? undefined : saveProfile}
+            />
           </main>
         </div>
       </div>

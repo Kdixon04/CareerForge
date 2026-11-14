@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { StudentProfileSchema } from '../../../contracts';
+import { exampleStudent } from '../../../data/examples';
 import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import { ProfilePreview } from './ProfilePreview';
 import '../../../styles/tokens.css';
@@ -9,6 +10,10 @@ import './profile.css';
 export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
+  if (process.env.CAREERFORGE_E2E_PROFILE_FIXTURE === '1') {
+    return <ProfilePreview initialProfile={exampleStudent} fixtureMode />;
+  }
+
   const supabase = await createSupabaseServerClient();
 
   const {
