@@ -141,7 +141,8 @@ function MissingJobDetail({
             : 'No published job matches this id.'}
         </strong>
         <p>
-          Return to the jobs page to choose another opportunity.
+          Published jobs appear in the list on /jobs. Parse previews are not stored until you save a private
+          import. Return to jobs to pick a published opportunity or paste again.
         </p>
       </aside>
 

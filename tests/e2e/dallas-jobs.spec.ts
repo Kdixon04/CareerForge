@@ -80,11 +80,12 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       await expect(
         page.getByRole('button', { name: 'Save as private job (not connected)' }),
       ).toBeDisabled();
-      await expect(card.getByRole('link', { name: 'Try preview id on detail (may be empty)' })).toBeVisible();
-      await card.getByRole('link', { name: 'Try preview id on detail (may be empty)' }).click();
-      // Parse route assigns a new preview id; only the fictional example id resolves on detail until import.
-      await expect(page.getByText('No fixture posting matches this id.')).toBeVisible();
-      await page.goto(`/jobs/${EXAMPLE_JOB_ID}`);
+      await expect(card.getByText(/Parse preview only — not saved/)).toBeVisible();
+      await expect(card.getByText(/not a published job/)).toBeVisible();
+      await expect(card.getByRole('link', { name: /Try preview id/ })).toHaveCount(0);
+
+      await page.getByRole('link', { name: 'Open example job detail' }).click();
+      await page.waitForURL(`**/jobs/${EXAMPLE_JOB_ID}`);
       await expect(page.getByText('Fixture preview — not loaded from the database.')).toBeVisible();
       await expect(page.getByRole('link', { name: 'Review résumé suggestions' })).toBeVisible();
 

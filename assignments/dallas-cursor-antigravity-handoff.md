@@ -1,58 +1,63 @@
 # Cursor ↔ Antigravity / Dallas handoff
 
-**Status on `main` (2026-11-14):** Cursor slice **#20** and CI fix **#24** are merged at `8964410`. Fixture job detail (`/jobs/[id]`), match review (`/match/[id]`), and paste UI are on `main`. **No** `POST /api/jobs/import` or `GET /api/jobs/[id]` routes exist yet (only `POST /api/jobs/parse`).
+**Updated:** 2026-11-14 · **main** at `1ab45e6` (includes auth, profile adapter #31, published jobs adapter #32)
 
-Cursor owns student UI in `src/app/(student)/jobs/**` and `match/**`. Cursor does **not** edit `src/app/api/**`, `src/lib/jobs/**` adapters, or `src/contracts/**`.
-
----
-
-## Live today
-
-| Route | Request | Success | Errors (body) |
-|-------|---------|---------|----------------|
-| `POST /api/jobs/parse` | JSON `JobDraft` fields | `{ data: JobPosting }` preview (not persisted; ephemeral `id`) | `400` `{ error: { code, message } }` |
-
-Consumer: `PasteJobForm` → `submitPasteJob` (`IS_PARSE_ROUTE_MERGED = true` on main).
+Cursor owns `src/app/(student)/jobs/**` and `match/**`. Cursor does **not** edit `src/app/api/**`, `src/lib/jobs/**` (except consuming types), `src/lib/supabase/**`, or contracts.
 
 ---
 
-## Blocked: what Cursor needs to replace fixture job detail
+## Working today (not Cursor-owned)
 
-### `POST /api/jobs/import` (Antigravity + Keyan adapter)
+| Capability | How | Cursor UI |
+|------------|-----|-----------|
+| Sign-in | Supabase auth + middleware | Users must sign in for live job browse |
+| Profile save/load | `GET/PUT /api/profile` + Keyan adapter (#31) | Steve’s `/profile` |
+| **Published job browse/detail** | `listPublishedJobs` / `getPublishedJob` in `src/lib/jobs/job-adapter.ts` (Supabase RLS, `status=published`, `source=employer`) | `/jobs` list + `/jobs/[id]` when **not** in `CAREERFORGE_E2E_JOBS_FIXTURE=1` |
+| Parse preview | `POST /api/jobs/parse` | `PasteJobForm` → `submitPasteJob` |
 
-| | |
-|---|---|
-| **Auth** | Session cookie; server derives `createdByUserId` from verified session — **never** accept client `userId`. |
-| **Body** | `JobDraft`: `{ title, company, description, location, jobType, workMode, sourceUrl, deadline }` (same shape parse validates). |
-| **Success `200`** | `{ data: JobPosting }` with server-set `id`, `source: "pasted"`, `status: "private"`, `deadlineVerified: false`, `employerId: null`, timestamps, `createdByUserId` = caller. |
-| **`400`** | `{ error: { code: "INVALID_INPUT", message: string } }` |
-| **`401`** | `{ error: { code: "UNAUTHENTICATED", message: string } }` |
-| **`403`** | `{ error: { code: "FORBIDDEN", message: string } }` (wrong role if applicable) |
-| **`503`** | `{ error: { code: "SERVICE_UNAVAILABLE", message: string } }` adapter/DB unavailable — generic message, no stack trace |
+**Fixture CI:** `CAREERFORGE_E2E_JOBS_FIXTURE=1` (see `.github/workflows/ci.yml`) swaps list/detail to `exampleJob` + `findFixtureJob` so Playwright does not require live Supabase rows.
 
-**Cursor behavior after merge:** explicit **“Save as private job”** after parse preview; on success navigate to `/jobs/{data.id}`; UI labels **saved private import**, still **unverified** deadline/opening.
-
-### `GET /api/jobs/[id]` (Antigravity + Keyan authorized read)
-
-| | |
-|---|---|
-| **Auth** | Session cookie; RLS — caller may read own `private` pasted job, published employer jobs they’re allowed to see, etc. (per AGENTS.md). |
-| **Success `200`** | `{ data: JobPosting }` |
-| **`401`** | `{ error: { code: "UNAUTHENTICATED", message: string } }` |
-| **`403`** | `{ error: { code: "FORBIDDEN", message: string } }` |
-| **`404`** | `{ error: { code: "NOT_FOUND", message: string } }` — must not leak private resources owned by others |
-
-**Cursor behavior after merge:** `/jobs/[id]` uses authorized fetch first; **fixture example** remains only for the labeled example card link (`exampleJob.id`). Detail copy distinguishes **saved private import** vs **fictional example**.
-
-### Dallas / Keyan signals Cursor will watch for
-
-1. PR or handoff naming the import/read routes merged and adapter ready in dev/CI.
-2. Cursor sets `IS_JOB_PERSISTENCE_AVAILABLE = true` in `src/app/(student)/jobs/job-api-client.ts` (Cursor-owned) after smoke against real auth.
-3. E2E credentials: `E2E_STUDENT_A_EMAIL` / `PASSWORD` for reload persistence test — **NOT RUN** until routes + env on CI.
+**Still missing:** `POST /api/jobs/import`, `GET /api/jobs/[id]` HTTP routes for **private** pasted imports (Antigravity + Keyan). No import/read API files under `src/app/api/jobs/` yet.
 
 ---
 
-## Résumé routes (next after import/read slice)
+## Three job states in the UI (must stay distinct)
+
+| State | What it is | User action | Detail route today |
+|-------|------------|-------------|-------------------|
+| **Parse preview** | Ephemeral `JobPosting` from parse; random `id`; **not in DB** | Preview pasted job | **Do not** link to `/jobs/{preview.id}` — published detail cannot load it |
+| **Saved private import** | Persisted `source=pasted`, `status=private` (future) | Save as private job (blocked) | Future: `GET /api/jobs/[id]` + detail copy “Private import” |
+| **Published employer job** | DB row, RLS-visible | Open job detail from list | `getPublishedJob` on server |
+
+Match review (`/match/[id]`) remains **fixture-only** until résumé routes land.
+
+---
+
+## Blocked: private import/read (Antigravity)
+
+### `POST /api/jobs/import`
+
+- **Auth:** verified session; server sets `createdByUserId`; reject anonymous.
+- **Body:** `JobDraft` (same fields as parse).
+- **200:** `{ data: JobPosting }` with `source: "pasted"`, `status: "private"`, `deadlineVerified: false`, server `id`, timestamps.
+- **400:** `{ error: { code: "INVALID_INPUT", message: string } }`
+- **401:** `{ error: { code: "UNAUTHENTICATED", message: string } }`
+- **403:** `{ error: { code: "FORBIDDEN", message: string } }`
+- **503:** `{ error: { code: "SERVICE_UNAVAILABLE", message: string } }`
+
+### `GET /api/jobs/[id]`
+
+- **Auth:** session; RLS per AGENTS.md (own private paste, published employer, saved paused listing rules).
+- **200:** `{ data: JobPosting }`
+- **401 / 403 / 404:** `{ error: { code, message } }` — no cross-user existence leak.
+
+**Cursor enablement (separate PR after merge):** set `IS_JOB_PERSISTENCE_AVAILABLE = true` in `src/app/(student)/jobs/job-api-client.ts`; wire Save → navigate → server detail merge (authorized private + existing published path). E2E with **real** `E2E_STUDENT_A_*` / `E2E_STUDENT_B_*` for reload + isolation (**NOT RUN** until routes + CI secrets).
+
+**Client prep on PR #27:** `job-api-client.ts` with `IS_JOB_PERSISTENCE_AVAILABLE = false` — **no fetch** to import/GET when false (unit tests use **mocked** fetch only; not proof of persistence).
+
+---
+
+## Résumé (after private import/read)
 
 | Route | Request | Success |
 |-------|---------|---------|
@@ -60,20 +65,11 @@ Consumer: `PasteJobForm` → `submitPasteJob` (`IS_PARSE_ROUTE_MERGED = true` on
 | `GET /api/resume/[id]` | — | `{ data: ResumeVersion }` |
 | `PATCH /api/resume/[id]` | `{ editedBullets: [{ id, text }] }` | `{ data: ResumeVersion }` |
 
-Match UI today: `/match/[jobId]` + fixtures. After suggest exists: confirm with Dallas whether URL stays job-scoped or becomes `/match/[resumeVersionId]`.
-
 ---
 
-## Honesty (both sides)
+## Historical
 
-- Parse preview ≠ saved job; UI must not imply otherwise.
-- No client-supplied `source`, `status`, `deadlineVerified`, or ownership fields.
-- No ATS / match % / “verified open” copy.
+- Cursor **#20** / **#24** merged; **#16** closed redundant.
+- **#27** (this handoff + gated save UI) open — import/read prep only.
 
----
-
-## Historical (obsolete — do not follow)
-
-~~PR merge order #16 / #20~~ — **#16 closed redundant**; **#20 merged** (`938da52`); **#24** test fix merged (`8964410`).
-
-Requested by: Cursor, 2026-11-14 (updated after merge reconciliation)
+Requested by: Cursor, 2026-11-14

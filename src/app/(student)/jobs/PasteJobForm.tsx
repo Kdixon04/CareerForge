@@ -208,10 +208,14 @@ export function PasteJobForm() {
             )}
             <p className="cf-jobs-card-note">
               {savedPosting
-                ? 'This job was saved as your private import. Reload /jobs/[id] should show the same posting once authorized reads are wired.'
-                : 'This is a parse preview only — not saved. After import connects, use Save as private job before opening detail.'}
+                ? 'Saved as your private import. Opening detail uses the persisted job id (authorized read required).'
+                : 'Parse preview only — not saved. The preview id is not a published job and cannot open on the published detail route.'}
               {!savedPosting && (
-                <> Use the labeled <strong>example opportunity</strong> above to try fixture detail and match.</>
+                <>
+                  {' '}
+                  Use <strong>Save as private job</strong> once import is connected, or open a{' '}
+                  <strong>published opportunity</strong> from the list above for the live detail page.
+                </>
               )}
             </p>
             {saveError && (
@@ -233,16 +237,9 @@ export function PasteJobForm() {
               <span className="cf-hint" id="save-private-hint">
                 {IS_JOB_PERSISTENCE_AVAILABLE
                   ? 'Persists a private pasted import for your account.'
-                  : 'Waits for POST /api/jobs/import and GET /api/jobs/[id].'}
+                  : 'Not connected — no request is sent until POST /api/jobs/import and GET /api/jobs/[id] exist.'}
               </span>
             </p>
-            {!IS_JOB_PERSISTENCE_AVAILABLE && (
-              <p className="cf-jobs-example-actions">
-                <a className="cf-button cf-button--secondary" href={`/jobs/${preview.id}`}>
-                  Try preview id on detail (may be empty)
-                </a>
-              </p>
-            )}
             {savedPosting && (
               <p className="cf-jobs-example-actions">
                 <a className="cf-button cf-button--secondary" href={`/jobs/${savedPosting.id}`}>
