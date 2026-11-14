@@ -67,6 +67,8 @@ create table public.jobs (
   location text,
   job_type text not null default 'unknown',
   work_mode text not null default 'unknown',
+  constraint jobs_job_type_check check (job_type in ('internship', 'full_time', 'part_time', 'co_op', 'contract', 'unknown')),
+  constraint jobs_work_mode_check check (work_mode in ('remote', 'hybrid', 'on_site', 'unknown')),
   source public.job_source not null,
   provider_name text,
   external_id text,
@@ -78,6 +80,10 @@ create table public.jobs (
   deadline date,
   deadline_verified boolean not null default false,
   verification_status public.job_verification_status not null default 'unverified',
+  constraint job_deadline_verification_check check (
+    (deadline_verified and verification_status = 'verified')
+    or (not deadline_verified and verification_status <> 'verified')
+  ),
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   constraint employer_job_provenance check (
@@ -263,7 +269,10 @@ grant select, insert, update on public.employers to authenticated;
 grant select, insert, update, delete on public.student_facts to authenticated;
 grant select, insert, update on public.jobs to authenticated;
 grant select, insert, update, delete on public.saved_applications to authenticated;
-grant select, insert, update on public.resume_versions to authenticated;
+-- Resume versions are read/edited through the server-side generation path.
+-- Authenticated clients may update only their own edited_bullets; creation of
+-- generated_payload and fact_snapshot is not a direct browser operation.
+grant select, update on public.resume_versions to authenticated;
 grant execute on function public.has_role(public.app_role) to authenticated;
 grant execute on function public.is_employer_owner(uuid) to authenticated;
 grant execute on function public.can_read_job(uuid) to authenticated;
@@ -325,7 +334,7 @@ create policy jobs_update_own on public.jobs for update to authenticated
     created_by_user_id = auth.uid()
     and (
       (source = 'employer' and public.has_role('employer') and public.is_employer_owner(employer_id))
-      or (source <> 'employer' and employer_id is null)
+      or (source <> 'employer' and employer_id is null and status = 'private')
     )
   );
 
@@ -379,7 +388,8 @@ as $$
     (select count(*) from public.job_views v where v.job_id = j.id),
     (select count(*) from public.saved_applications sa where sa.job_id = j.id)
   from public.jobs j
-  where j.source = 'employer'
+  where public.has_role('employer')
+    and j.source = 'employer'
     and public.is_employer_owner(j.employer_id);
 $$;
 
