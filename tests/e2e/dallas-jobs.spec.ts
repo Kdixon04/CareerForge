@@ -75,6 +75,11 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined();
       expect(await page.locator('.cf-jobs-card-description img').count()).toBe(0);
 
+      await expect(card.getByRole('link', { name: 'Continue to job detail (fixture-backed)' })).toBeVisible();
+      await card.getByRole('link', { name: 'Continue to job detail (fixture-backed)' }).click();
+      await expect(page.getByText('Fixture preview — not loaded from the database.')).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Review résumé suggestions' })).toBeVisible();
+
       // No horizontal overflow and no console/page errors.
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       expect(errors).toEqual([]);
