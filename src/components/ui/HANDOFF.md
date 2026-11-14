@@ -1,3 +1,14 @@
+# Current theme PR reconciliation — November 14, 2026
+
+Dedicated checkout: `C:/Users/luket/OneDrive/Documents/ChatGPT/CareerForge-steve`, branch `feature/steve-profile-theme`, PR #17. Resumed the saved main merge and untracked theme regression without resetting or replacing either. Safely merged current `origin/main` at `8964410`; the full shared AGENTS.md is byte-identical to main. RootLayout still owns ThemeProvider and current main still nests another in ProfilePreview, so the removal remains needed.
+
+Latest local evidence: locked install had already passed in this checkout; rerun typecheck PASS, Vitest 55/55 PASS, production build PASS, Chromium smoke 56 PASS / 6 callback-fixture cases intentionally skipped. New Steve-owned `tests/e2e/steve-theme-navigation.spec.ts` covers Home -> toggle -> Profile -> reload -> toggle -> Home -> reload at 390x844 and 1280x800, both initial themes, keyboard Space, matching toggle state/body color, no overflow/console errors and theme-only localStorage. Manual browser navigation/switch/reload also passed at both sizes in light/dark. Screenshots are generated under ignored test-results. No fixture data persistence is claimed.
+
+The earlier local npm.cmd startup failure was environment setup, before tests ran; an ignored node_modules shim fixed the local command without shared config changes. Latest main's CI at 8964410 is green (run 43589629248); no current main test failure was reproduced. The inherited package audit remains 7 findings (3 moderate, 2 high, 2 critical); package/lockfile fixes belong to Dallas, with a Zod-security branch already visible. Normal CI does not run npm audit. No audit/security-clean or deployment claim is made.
+
+Only ProfilePreview, Steve's assignment/handoff and the Steve theme regression differ from main. PR #17 is kept separate from the broader local persistence WIP. GitHub checks must be read on the newly pushed PR head; local success is not a hosted CI result.
+
+After theme acceptance, request Keyan/Dallas's verified auth client exports, atomic own-profile save signature/concurrency/error semantics and application adapters. No src/lib/supabase or src/lib/data implementations exist on main at this checkpoint. Do not copy WIP SQL/contracts/adapters into this PR. Until that authorized backend exists, profile is a fictional unsaved preview and the next Steve slice is explicitly fixture-only saved-application UI in its own PR.
 # Steve design and profile handoff
 
 ## State and boundaries
