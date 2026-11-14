@@ -48,4 +48,6 @@ Report task/files/checks/browser themes+widths/security findings/blockers/next. 
 Stretch after both themes/core persistence: Spanish strings if team wants them, small skeleton polish, calendar export UI with explicitly agreed date behavior.
 
 
-Confirmed with Steve: explain as we go; use CareerForge.webp colors. Submission: November 14, 2026, 4 p.m. America/Denver; ready by 3:30 p.m. Profile → job → résumé edits → saved application is the confirmed demo. Broader scope does not authorize extra features. No prototype available. First build plan awaits Steve's go.
+Confirmed with Steve: explain as we go; use CareerForge.webp colors. Submission: November 14, 2026, 4 p.m. America/Denver; ready by 3:30 p.m. Profile → job → résumé edits → saved application is the confirmed demo. Broader scope does not authorize extra features. No prototype available. Steve approved the first build plan.
+
+First visual slice implemented on feature/steve: semantic light/dark tokens, accessible Button/Input, ThemeProvider/ThemeToggle, MainNav and an isolated React SSR/hydration preview. See [component handoff](../src/components/ui/HANDOFF.md) for exact props, run commands, changed paths, verification and integration requests. Six unit/component checks, strict TypeScript (10 files) and six Playwright checks pass; manual browser validation and all four phone/desktop theme screenshots reviewed. These are component-fixture checks only. Real profile/saved routes, persistence/security, Next.js build and deployed checks await Dallas's scaffold/contracts and Keyan's adapters.
