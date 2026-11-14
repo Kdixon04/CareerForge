@@ -280,3 +280,27 @@ User explicitly authorized sending these requests and recording evidence/status.
 - Steve-owned review follow-up remains open: application reload during a pending save/removal can clear items before a stale callback uses map/filter. Fix with a focused regression test before connecting the real UI; it was reported, not silently fixed in this coordination step.
 
 Next gate: obtain the actual approved adapter signatures/branch and isolated environment configuration, confirm exact DTO/version/error/role mapping, then connect and run LIVE-VERIFICATION.md end to end with ordinary fictional users. Record request/response and unchanged stored state on denial, precision/conflict/rollback evidence, reload/new-session durability, both viewport/theme journeys, A/B and deployed checks. Only completed real checks count toward readiness. PR #35 stays DRAFT; no production-persistence fallback, inactive security-workflow activation or full-assignment completion claim is authorized by mocked results.
+
+## Local application reload/mutation race fix — awaiting commit permission
+
+User approved fixing Steve's reviewed reload/save race and adding regression coverage. These edits are LOCAL and uncommitted; no push, PR update, teammate message or deployment was performed. Published PR #35 at 72c4bf7 still has the previously reviewed code until a later approved commit/push. No approved real adapter or live environment was connected.
+
+Root cause: dirty=false did not mean idle. An unchanged application could have a save/removal in flight while the parent reload/add/user controls remained enabled. Clearing the list for a reload could leave an old callback calling map/filter on null.
+
+Fix: track pending application IDs separately from dirty state, expose optional onBusyChange for parent controls, guard reload synchronously while any mutation is pending, and disable reload while loading. Each row clears pending state after success/failure and on unmount; a synchronous row guard prevents duplicate starts. Nullable list updates safely retain loading state if a late callback arrives after the list clears. The isolated lab uses busy state to disable its identity selector/add action, which can remount the list. Independent rows can still update; finishing one does not release another row's lock. Error retry and successful removal's reload-button focus are retained.
+
+Regression evidence: the four update/remove x success/error Chromium cases FAILED before the fix because Reload applications remained enabled. After fixing, these four plus a two-row pending-write case pass. All five use held/intercepted requests and fictional memory data only; no real authentication, RLS, database concurrency or durability is demonstrated.
+
+Commands/results for this local step:
+- node node_modules/@playwright/test/cli.js test --config src/components/ui/student-data/testing/playwright.config.ts --grep 'pending application': initial 4 FAIL (expected missing busy lock), then 4 PASS after implementation.
+- npm run typecheck: PASS (via existing temporary npm-cli.js on this machine).
+- npm test: 127 PASS / 23 files; no existing assertions/tests weakened.
+- node src/components/ui/student-data/testing/verify-contracts.mjs: 37 PASS, explicitly mocked contracts/guards (subset of 127).
+- Full Playwright lab command above without --grep: 14/14 PASS, including existing 390/1280 light/dark save/reload/isolation/error/unsaved flows and the 5 new race cases.
+- Read-only in-memory hook diagnostic on actual component source: late update and remove callbacks with a null list no longer throw; this diagnostic is not a full React/browser test or live security evidence.
+- npm run build: PASS.
+- node src/components/ui/student-data/testing/scan-secrets.mjs: PASS, including generated production/lab JavaScript.
+- Manual loopback browser lab: unchanged delayed update/removal visibly locks reload, add and identity controls; reload error receives focus; retry works; successful removal shows empty state and focuses reload. Lab server stopped after use; public fictional demo on port 3000 retained.
+- git diff --check: PASS. Existing full audit findings/security CI approval/live environment blockers are unchanged; no fresh dependency audit or hosted CI run is claimed for uncommitted changes.
+
+Changed files: src/components/ui/student-data/AdapterEditors.tsx; src/components/ui/student-data/testing/AdapterLab.tsx; src/components/ui/student-data/testing/browser.lab.ts; this HANDOFF.md. No auth/SQL/shared contract/package/workflow edits. Commit and push require the user's next permission; PR #35 must remain draft.

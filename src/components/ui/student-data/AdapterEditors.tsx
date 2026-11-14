@@ -27,11 +27,20 @@ export function ProfileAdapterEditor({adapter,onDirtyChange}:{adapter?:StudentDa
     </>}
   </section>;
 }
-function ApplicationEditor({adapter,item,onChange,onRemove,onDirty}:{adapter:StudentDataAdapter;item:Application;onChange:(value:Application)=>void;onRemove:()=>void;onDirty:(id:string,dirty:boolean)=>void}){
+function ApplicationEditor({adapter,item,onChange,onRemove,onDirty,onPending}:{adapter:StudentDataAdapter;item:Application;onChange:(value:Application)=>void;onRemove:()=>void;onDirty:(id:string,dirty:boolean)=>void;onPending:(id:string,pending:boolean)=>void}){
   const [status,setStatus]=useState(item.status),[deadline,setDeadline]=useState(item.deadline??''),[notes,setNotes]=useState(item.notes),[busy,setBusy]=useState(false),[error,setError]=useState(''),[success,setSuccess]=useState('');
+  const busyRef=useRef(false);
+  function begin(){if(busyRef.current)return false;busyRef.current=true;setBusy(true);onPending(item.id,true);return true;}
+  function finish(){busyRef.current=false;setBusy(false);onPending(item.id,false);}
+  useEffect(()=>()=>onPending(item.id,false),[item.id,onPending]);
+  async function remove(){
+    if(!begin())return;setError('');
+    try{await adapter.removeApplication(item.id);onRemove();requestAnimationFrame(()=>document.getElementById('adapter-app-refresh')?.focus());}
+    catch(failure){setError(message(failure));}finally{finish();}
+  }
   const errorRef=useRef<HTMLParagraphElement>(null);useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
   const dirty=status!==item.status||deadline!==(item.deadline??'')||notes!==item.notes;useEffect(()=>{onDirty(item.id,dirty);},[item.id,dirty,onDirty]);
-  async function update(event:FormEvent){event.preventDefault();if(busy)return;setSuccess('');const input=ApplicationPatchSchema.safeParse({status,deadline:deadline||null,notes,expectedUpdatedAt:item.updatedAt});if(!input.success){setError('Check the status/date and keep notes to 4,000 characters.');return;}setBusy(true);setError('');try{onChange(ownApplication(adapter,await adapter.patchApplication(item.id,input.data)));setSuccess(adapter.kind==='test-double'?'Test double updated; lab memory only.':'Adapter update confirmed.');}catch(failure){setError(message(failure));}finally{setBusy(false);}}
+  async function update(event:FormEvent){event.preventDefault();if(busyRef.current)return;setSuccess('');const input=ApplicationPatchSchema.safeParse({status,deadline:deadline||null,notes,expectedUpdatedAt:item.updatedAt});if(!input.success){setError('Check the status/date and keep notes to 4,000 characters.');return;}if(!begin())return;setError('');try{onChange(ownApplication(adapter,await adapter.patchApplication(item.id,input.data)));setSuccess(adapter.kind==='test-double'?'Test double updated; lab memory only.':'Adapter update confirmed.');}catch(failure){setError(message(failure));}finally{finish();}}
   return <Card aria-label={item.job?.title??'Unavailable listing'}><h3>{item.job?.title??'Listing unavailable'}</h3>
     {item.job?<><p>{item.job.company} · Source: {item.job.source}</p>{item.job.status==='paused'&&<p>Inactive listing</p>}<p>{item.job.deadline?`Listing deadline (${item.job.deadlineVerified?'verified':'unverified'}): ${item.job.deadline}`:'Deadline not provided'}</p></>:<p>Listing content is unavailable; tracking is retained.</p>}
     {dirty&&<p role="status">Unsaved application changes.</p>}
@@ -40,20 +49,25 @@ function ApplicationEditor({adapter,item,onChange,onRemove,onDirty}:{adapter:Stu
       <Textarea label="Application notes" maxLength={4000} value={notes} onChange={event=>{setNotes(event.target.value);setSuccess('');}}/>
       <Button type="submit">{busy?'Updating…':adapter.kind==='test-double'?'Update test double':'Update application'}</Button>
       <Button variant="secondary" onClick={()=>{setStatus(item.status);setDeadline(item.deadline??'');setNotes(item.notes);setError('');setSuccess('');}}>Reset application edits</Button>
-      <Button variant="secondary" onClick={async()=>{if(busy)return;setBusy(true);setError('');try{await adapter.removeApplication(item.id);onRemove();requestAnimationFrame(()=>document.getElementById('adapter-app-refresh')?.focus());}catch(failure){setError(message(failure));setBusy(false);}}}>{adapter.kind==='test-double'?'Remove from test double':'Unsave application'}</Button>
+      <Button variant="secondary" onClick={remove}>{adapter.kind==='test-double'?'Remove from test double':'Unsave application'}</Button>
     </fieldset></form>{error&&<p ref={errorRef} tabIndex={-1} role="alert">{error}</p>}<p role="status">{success}</p>
   </Card>;
 }
-export function ApplicationsAdapterEditor({adapter,onDirtyChange}:{adapter?:StudentDataAdapter;onDirtyChange?:(dirty:boolean)=>void}){
+export function ApplicationsAdapterEditor({adapter,onDirtyChange,onBusyChange}:{adapter?:StudentDataAdapter;onDirtyChange?:(dirty:boolean)=>void;onBusyChange?:(busy:boolean)=>void}){
   const [items,setItems]=useState<Application[]|null>(null),[error,setError]=useState(''),[load,setLoad]=useState(0),[dirtyIds,setDirtyIds]=useState<Record<string,boolean>>({});
+  const pendingIds=useRef(new Set<string>()),[pending,setPending]=useState(false);
+  const pendingCallback=useRef((id:string,value:boolean)=>{if(value)pendingIds.current.add(id);else pendingIds.current.delete(id);setPending(pendingIds.current.size>0);}).current;
+  useEffect(()=>{onBusyChange?.(pending);},[pending,onBusyChange]);
+  useEffect(()=>()=>onBusyChange?.(false),[onBusyChange]);
   const loadError=useRef<HTMLDivElement>(null);useEffect(()=>{if(error)loadError.current?.focus();},[error]);
   const dirty=Object.values(dirtyIds).some(Boolean);useUnsaved(dirty);useEffect(()=>{onDirtyChange?.(dirty);},[dirty,onDirtyChange]);
   const dirtyCallback=useRef((id:string,value:boolean)=>setDirtyIds(current=>current[id]===value?current:{...current,[id]:value})).current;
-  useEffect(()=>{let active=true;setItems(null);setError('');setDirtyIds({});if(!adapter){setError('Adapter not connected. Applications are unavailable.');return;}
+  useEffect(()=>{let active=true;setItems(null);setError('');setDirtyIds({});pendingIds.current.clear();setPending(false);if(!adapter){setError('Adapter not connected. Applications are unavailable.');return;}
     adapter.listApplications().then(values=>{if(active){if(!Array.isArray(values))throw new AdapterError('INVALID_DATA');setItems(values.map(value=>ownApplication(adapter,value)));}}).catch(failure=>{if(active)setError(message(failure));});return()=>{active=false;};
   },[adapter,load]);
-  return <section aria-label="Application adapter integration"><h2>Application adapter integration</h2>{adapter?.kind==='test-double'&&<p>TEST DOUBLE: application updates exist only in lab server memory.</p>}
-    <Button id="adapter-app-refresh" variant="secondary" disabled={dirty} onClick={()=>setLoad(n=>n+1)}>Reload applications</Button>
-    {error?<div ref={loadError} tabIndex={-1} role="alert"><p>{error}</p><Button onClick={()=>setLoad(n=>n+1)}>Retry application load</Button></div>:!items?<p role="status">Loading applications through adapter…</p>:items.length===0?<p role="status">No applications returned by this adapter.</p>:items.map(item=><ApplicationEditor key={item.id} item={item} adapter={adapter!} onDirty={dirtyCallback} onChange={next=>setItems(current=>current!.map(old=>old.id===next.id?next:old))} onRemove={()=>{setItems(current=>current!.filter(old=>old.id!==item.id));dirtyCallback(item.id,false);}}/>)}
+  function reloadApplications(){if(dirty||pendingIds.current.size>0)return;setLoad(n=>n+1);}
+  return <section aria-label="Application adapter integration" aria-busy={pending||(!items&&!error)}><h2>Application adapter integration</h2>{adapter?.kind==='test-double'&&<p>TEST DOUBLE: application updates exist only in lab server memory.</p>}
+    <Button id="adapter-app-refresh" variant="secondary" disabled={dirty||pending||items===null} onClick={reloadApplications}>Reload applications</Button>
+    {error?<div ref={loadError} tabIndex={-1} role="alert"><p>{error}</p><Button disabled={pending} onClick={reloadApplications}>Retry application load</Button></div>:!items?<p role="status">Loading applications through adapter…</p>:items.length===0?<p role="status">No applications returned by this adapter.</p>:items.map(item=><ApplicationEditor key={item.id} item={item} adapter={adapter!} onDirty={dirtyCallback} onPending={pendingCallback} onChange={next=>setItems(current=>current?.map(old=>old.id===next.id?next:old)??current)} onRemove={()=>{setItems(current=>current?.filter(old=>old.id!==item.id)??current);dirtyCallback(item.id,false);}}/>)}
   </section>;
 }

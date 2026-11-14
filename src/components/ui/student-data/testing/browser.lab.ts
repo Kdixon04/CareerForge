@@ -72,3 +72,115 @@ test('TEST DOUBLE application load errors receive focus and retry returns the em
   await region.getByRole('button', {name:'Retry application load', exact:true}).click();
   await expect(region.getByRole('status')).toHaveText('No applications returned by this adapter.');
 });
+
+for (const operation of ['update', 'remove'] as const) {
+  for (const outcome of ['success', 'error'] as const) {
+    test(`TEST DOUBLE pending application ${operation}/${outcome}: reload and remount controls stay locked`, async ({page,request}) => {
+      const origin = 'http://127.0.0.1:4318';
+      const headers = {'x-lab-user':'a', Origin:origin};
+      const seeded = await request.post('/lab/applications', {headers, data:{jobId:'44444444-4444-4444-8444-444444444444'}});
+      expect(seeded.status()).toBe(200);
+      const app = (await seeded.json()).data;
+      const errors:string[] = [];
+      page.on('pageerror', error => errors.push(error.message));
+      let release!:()=>void;
+      const gate = new Promise<void>(resolve => {release=resolve;});
+      const method = operation==='update'?'PATCH':'DELETE';
+      await page.route(`**/lab/applications/${app.id}`, async route => {
+        if(route.request().method()!==method){await route.continue();return;}
+        await gate;
+        if(outcome==='error')await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({error:{code:'UNAVAILABLE',message:'Fictional failed mutation'}})});
+        else await route.continue();
+      });
+      try {
+        await page.goto('/');
+        const region = applications(page);
+        const card = region.getByRole('region',{name:'Fictional role',exact:true});
+        const reload = region.getByRole('button',{name:'Reload applications',exact:true});
+        await expect(card).toBeVisible();
+        await expect(reload).toBeEnabled();
+        // No edits: dirty=false must not make a pending mutation reloadable.
+        const started = page.waitForRequest(req => req.method()===method && req.url().endsWith(`/lab/applications/${app.id}`));
+        await card.getByRole('button',{name:operation==='update'?'Update test double':'Remove from test double',exact:true}).click();
+        await started;
+        await expect(reload).toBeDisabled();
+        await expect(page.getByRole('combobox',{name:'Fictional user',exact:true})).toBeDisabled();
+        await expect(page.getByRole('button',{name:'Add fictional application to test double',exact:true})).toBeDisabled();
+        const completed = page.waitForResponse(response => response.request().method()===method && response.url().endsWith(`/lab/applications/${app.id}`));
+        release();
+        expect((await completed).status()).toBe(outcome==='error'?503:200);
+        if(outcome==='error') {
+          await expect(card.getByRole('alert')).toContainText('unavailable');
+          await expect(card.getByRole('alert')).toBeFocused();
+        } else if(operation==='remove') {
+          await expect(region.getByText('No applications returned by this adapter.',{exact:true})).toBeVisible();
+          await expect(reload).toBeFocused();
+        } else {
+          await expect(card.getByText('Test double updated; lab memory only.',{exact:true})).toBeVisible();
+        }
+        await expect(reload).toBeEnabled();
+        await expect(page.getByRole('combobox',{name:'Fictional user',exact:true})).toBeEnabled();
+        await expect(page.getByRole('button',{name:'Add fictional application to test double',exact:true})).toBeEnabled();
+        // The next reload may fail, but cannot overlap the completed mutation.
+        await page.getByRole('combobox',{name:'Test-double behavior',exact:true}).selectOption('load-error');
+        await reload.click();
+        await expect(region.getByRole('alert')).toContainText('unavailable');
+        await page.getByRole('combobox',{name:'Test-double behavior',exact:true}).selectOption('normal');
+        await region.getByRole('button',{name:'Retry application load',exact:true}).click();
+        await expect(reload).toBeEnabled();
+        if(operation==='remove'&&outcome==='success')await expect(card).toHaveCount(0);
+        else await expect(card).toBeVisible();
+        expect(errors).toEqual([]);
+      } finally {
+        release();
+        await page.unrouteAll({behavior:'wait'});
+        await request.delete(`/lab/applications/${app.id}`,{headers});
+      }
+    });
+  }
+}
+
+test('TEST DOUBLE pending applications: one completion cannot unlock another pending row', async ({page,request}) => {
+  const headers={'x-lab-user':'a',Origin:'http://127.0.0.1:4318'};
+  const apps=[];
+  for(const jobId of ['44444444-4444-4444-8444-444444444444','55555555-5555-4555-8555-555555555555']) {
+    const response=await request.post('/lab/applications',{headers,data:{jobId}});
+    expect(response.status()).toBe(200);apps.push((await response.json()).data);
+  }
+  const releases=new Map<string,()=>void>();
+  const gates=new Map(apps.map(app=>[app.id,new Promise<void>(resolve=>releases.set(app.id,resolve))]));
+  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.route('**/lab/applications/*',async route=>{
+    const id=new URL(route.request().url()).pathname.split('/').at(-1)!;
+    if(route.request().method()==='PATCH'&&gates.has(id))await gates.get(id);
+    await route.continue();
+  });
+  try {
+    await page.goto('/');const region=applications(page);
+    const card=(id:string)=>region.getByRole('region',{name:'Fictional role',exact:true}).filter({has:page.locator(`[id="adapter-status-${id}"]`)});
+    const reload=region.getByRole('button',{name:'Reload applications',exact:true});
+    for(const app of apps){
+      const started=page.waitForRequest(req=>req.method()==='PATCH'&&req.url().endsWith(`/lab/applications/${app.id}`));
+      await card(app.id).getByRole('button',{name:'Update test double',exact:true}).click();await started;
+    }
+    await expect(reload).toBeDisabled();
+    for(let index=0;index<apps.length;index++) {
+      const app=apps[index];
+      const completed=page.waitForResponse(response=>response.request().method()==='PATCH'&&response.url().endsWith(`/lab/applications/${app.id}`));
+      releases.get(app.id)!();expect((await completed).status()).toBe(200);
+      await expect(card(app.id).getByText('Test double updated; lab memory only.',{exact:true})).toBeVisible();
+      if(index===0){
+        await expect(reload).toBeDisabled();
+        await expect(page.getByRole('combobox',{name:'Fictional user',exact:true})).toBeDisabled();
+        await expect(page.getByRole('button',{name:'Add fictional application to test double',exact:true})).toBeDisabled();
+      }
+    }
+    await expect(reload).toBeEnabled();
+    await expect(page.getByRole('combobox',{name:'Fictional user',exact:true})).toBeEnabled();
+    await expect(page.getByRole('button',{name:'Add fictional application to test double',exact:true})).toBeEnabled();
+    expect(errors).toEqual([]);
+  } finally {
+    releases.forEach(release=>release());await page.unrouteAll({behavior:'wait'});
+    for(const app of apps)await request.delete(`/lab/applications/${app.id}`,{headers});
+  }
+});
