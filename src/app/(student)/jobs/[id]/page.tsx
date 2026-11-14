@@ -148,7 +148,7 @@ function MissingJobDetail({
       <p className="cf-jobs-card-meta">Requested id: {id}</p>
 
       <a className="cf-button" href="/jobs">
-        Back to jobs
+        {fixtureMode ? 'Back to paste a job' : 'Back to jobs'}
       </a>
     </>
   );
