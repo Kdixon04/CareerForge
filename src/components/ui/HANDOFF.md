@@ -16,7 +16,7 @@ Keyan and Dallas: confirm the verified own-profile adapter paths/signatures, ato
 
 Dallas owns `src/app/layout.tsx` and `src/app/page.tsx`; Steve owns `src/app/globals.css`. A temporary main-based Next worktree verified the following wiring with committed React/Next dependencies; it is **not** part of this PR:
 
-1. Import `src/styles/tokens.css` and `src/styles/components.css` once in root layout. Ask Steve to map the current `body` background/text in his `globals.css` to `var(--cf-bg)` / `var(--cf-text)` so both themes affect the actual page. Never import `examples/preview.css` into the product.
+1. `globals.css` now imports `src/styles/tokens.css` and maps the actual body, foundation aliases, card, borders and CTA to the shared palette; the landing follows system light/dark preference without JavaScript. Import `src/styles/components.css` once in root layout for the shared components. Never import `examples/preview.css` into the product.
 2. Wrap the shell once in `ThemeProvider` from `src/components/theme/ThemeProvider.tsx`. Put `ThemeToggle` inside it. Only the `careerforge-theme` preference is stored locally; `aria-pressed` conveys the current theme.
 3. Put static `THEME_INIT_SCRIPT` from `src/components/theme/theme.ts` in the document head before first paint. Supply a CSP nonce if needed; scope `suppressHydrationWarning` to `<html>` only if the intentional theme attribute change requires it.
 4. Add a skip link to the landing page's existing `<main>` after giving it `id="main"`; avoid nested landmarks. Replace the landing page's existing nav with `MainNav` in a small client shell using `usePathname()` for `currentPath`. Supply `showEmployer` from a verified role; it is presentation only. Its links are plain anchors and pages need real routes before release.
@@ -53,3 +53,13 @@ node src/components/ui/examples/preview-check.mjs --profile
 ```
 
 `preview-check.mjs` starts/stops the port-4317 fixture itself; `--profile` also starts/stops the built Next app on port 3000 for the integrated profile and simulated callback cases. `browser-check.mjs` writes its own Playwright config to the temporary toolchain. Set `STEVE_BROWSER` to a Chromium executable if Edge is unavailable. Bundles, screenshots and traces stay outside Git. Fixture checks prove component behavior, not database saves. Report each current command/result separately; no auth, RLS, persistence, live AI or deployment check is claimed.
+
+## Landing palette milestone
+
+Branch `feature/steve-shell-colors`, based on reviewed main `f6702ca`. Changed paths: `src/app/globals.css`, `tests/e2e/steve-shell.spec.ts`, this handoff and `assignments/steve-rogers.md`. No root layout, page markup, dependencies, contracts or database changes.
+
+The landing's separate green/light colors are bridged to the existing brown/gold/cream/charcoal tokens. Card surfaces/shadow/borders and the gold action use theme-aware colors; brand/action links have visible keyboard focus. The layout and product copy are preserved.
+
+Tests were written/run before CSS changes: 5/5 failed on the old body palette. After implementation: production build/type validation pass; contract tests 7/7, design Node tests 6/6 and profile Node tests 5/5 pass. Focused landing Playwright: 5/5 pass (390×844 and 1280×800, both schemes, rendered text contrast ≥4.5:1, keyboard action/focus, no overflow, dynamic system preference, and dark mode with JavaScript disabled). Full discovered smoke with temporary installed-Edge/reused-server override: 20 pass, 6 simulated callback cases intentionally skipped. Secretlint source/test/browser chunks: no findings. Manual browser action and all four screenshots inspected; screenshots use CSS pixels for consistent output on high-DPI test devices.
+
+Still blocked: real profile save/reload and isolation need Keyan's verified auth/data adapters. The landing has no toggle or stored-preference startup script until Dallas performs steps 2–4 above; this CSS milestone proves system preference, not manual preference across all routes. No standalone lint script or real persistence/security/deployed journey was run.
