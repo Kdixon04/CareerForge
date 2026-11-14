@@ -1,21 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { JobSchema } from './job';
+import { JobPostingSchema } from './job';
+import { exampleJob } from '../data/examples';
 
-describe('Job contract', () => {
-  it('requires a source URL and verification status', () => {
-    const result = JobSchema.safeParse({
-      id: 'job-001', title: 'Junior Web Developer', company: 'North Star Labs',
-      location: 'Rexburg, ID', sourceUrl: 'https://example.com/jobs/job-001',
-      verificationStatus: 'unverified',
-    });
-
-    expect(result.success).toBe(true);
+describe('job contract', () => {
+  it('accepts an unverified private pasted job', () => {
+    expect(JobPostingSchema.safeParse(exampleJob).success).toBe(true);
   });
-
-  it('rejects unsupported verification statuses', () => {
-    expect(JobSchema.safeParse({
-      id: 'job-001', title: 'Junior Web Developer', company: 'North Star Labs',
-      location: 'Rexburg, ID', sourceUrl: 'https://example.com/jobs/job-001', verificationStatus: 'maybe',
-    }).success).toBe(false);
+  it('rejects invalid source URLs and verification values', () => {
+    expect(JobPostingSchema.safeParse({ ...exampleJob, sourceUrl: 'javascript:bad' }).success).toBe(false);
+    expect(JobPostingSchema.safeParse({ ...exampleJob, deadlineVerified: 'yes' }).success).toBe(false);
   });
 });

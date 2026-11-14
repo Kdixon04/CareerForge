@@ -1,22 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { StudentProfileSchema } from './student';
+import { exampleStudent } from '../data/examples';
 
-describe('StudentProfile contract', () => {
-  it('accepts the smallest fictional profile shape', () => {
-    const result = StudentProfileSchema.safeParse({
-      id: 'student-001',
-      displayName: 'Maya Chen',
-      school: 'BYU-Idaho',
-      major: 'Computer Science',
-      skills: ['TypeScript', 'Testing'],
-    });
-
-    expect(result.success).toBe(true);
+describe('student contract', () => {
+  it('accepts factual, identified profile data', () => {
+    expect(StudentProfileSchema.safeParse(exampleStudent).success).toBe(true);
   });
-
-  it('rejects an empty skill', () => {
-    expect(StudentProfileSchema.safeParse({
-      id: 'student-001', displayName: 'Maya Chen', school: 'BYU-Idaho', major: 'Computer Science', skills: [''],
-    }).success).toBe(false);
+  it('rejects unsupported fact kinds', () => {
+    const bad = { ...exampleStudent, facts: [{ ...exampleStudent.facts[0], kind: 'award' }] };
+    expect(StudentProfileSchema.safeParse(bad).success).toBe(false);
   });
 });

@@ -1,15 +1,12 @@
 import { z } from 'zod';
 
-/** Provisional until Keyan confirms the Supabase profile/facts shape. */
 export const StudentFactSchema = z.object({
-  id: z.string().min(1), label: z.string().min(1), value: z.string().min(1),
-  category: z.enum(['skill', 'experience', 'education']),
+  id: z.string().uuid(), kind: z.enum(['skill', 'education', 'project', 'experience', 'interest']),
+  text: z.string().min(1), dates: z.string().nullable(), org: z.string().nullable(),
 });
-
 export const StudentProfileSchema = z.object({
-  id: z.string().min(1), displayName: z.string().min(1), school: z.string().min(1),
-  major: z.string().min(1), skills: z.array(z.string().min(1)).min(1), facts: z.array(StudentFactSchema).optional(),
+  userId: z.string().uuid(), displayName: z.string().min(1), field: z.string().nullable(),
+  facts: z.array(StudentFactSchema), updatedAt: z.string().datetime(),
 });
-
 export type StudentFact = z.infer<typeof StudentFactSchema>;
 export type StudentProfile = z.infer<typeof StudentProfileSchema>;

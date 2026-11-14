@@ -1,20 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { ResumeSuggestionSchema } from './resume';
+import { ResumeVersionSchema } from './resume';
+import { exampleResume } from '../data/examples';
 
-describe('Resume suggestion contract', () => {
-  it('links every suggestion to a source fact', () => {
-    const result = ResumeSuggestionSchema.safeParse({
-      id: 'suggestion-001', type: 'skill', text: 'Built a typed job tracker with TypeScript.',
-      sourceFactIds: ['skill-typescript'], evidence: 'TypeScript',
-    });
-
-    expect(result.success).toBe(true);
-    if (result.success) expect(result.data.sourceFactIds).toContain('skill-typescript');
+describe('resume contract', () => {
+  it('accepts a fictional version with evidence identifiers', () => {
+    expect(ResumeVersionSchema.safeParse(exampleResume).success).toBe(true);
   });
-
-  it('requires at least one source fact', () => {
-    expect(ResumeSuggestionSchema.safeParse({
-      id: 'suggestion-001', type: 'skill', text: 'A claim', sourceFactIds: [], evidence: 'A fact',
-    }).success).toBe(false);
+  it('rejects bullets without any evidence identifiers', () => {
+    const bad = { ...exampleResume, generatedBullets: [{ ...exampleResume.generatedBullets[0], evidence: [] }] };
+    expect(ResumeVersionSchema.safeParse(bad).success).toBe(false);
   });
 });
