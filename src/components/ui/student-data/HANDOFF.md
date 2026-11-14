@@ -175,3 +175,5 @@ The new PR is preparation/scaffolding only, includes inherited PR #29 fixture fi
 - `src/components/ui/student-data/testing/readiness.test.ts`
 - `src/components/ui/student-data/testing/steve-adapter-contracts.workflow.yml`
 - `src/components/ui/student-data/testing/verify-contracts.mjs`
+
+Publication: draft PR [#35](https://github.com/Kdixon04/CareerForge/pull/35) targets main. At this documentation checkpoint hosted CI is pending; opening CI run: https://github.com/Kdixon04/CareerForge/actions/runs/43617801983 . Read the PR checks for the latest head before review. No deployment or active security-workflow approval is implied.
