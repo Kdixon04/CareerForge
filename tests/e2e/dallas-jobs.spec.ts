@@ -13,7 +13,14 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       const errors: string[] = [];
       page.on('pageerror', error => errors.push(error.message));
       page.on('console', message => {
-        if (message.type() === 'error' && !message.location().url.endsWith('/favicon.ico')) errors.push(message.text());
+        if (message.type() !== 'error' || message.location().url.endsWith('/favicon.ico')) return;
+
+        // These two 400 responses are intentional validation cases exercised
+        // below. Browsers report failed HTTP resources to the console even
+        // though the application handles the responses and displays errors.
+        const text = message.text();
+        if (/Failed to load resource:.*status of 400/i.test(text)) return;
+        errors.push(text);
       });
 
       await page.goto('/jobs');
