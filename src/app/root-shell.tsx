@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
+import { MainNav } from '../components/nav/MainNav';
 import { ThemeToggle } from '../components/theme/ThemeToggle';
 
 // Only routes that actually exist today are listed. There is intentionally no
@@ -11,19 +12,16 @@ import { ThemeToggle } from '../components/theme/ThemeToggle';
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/profile', label: 'Profile' },
-] as const;
+];
 
 /**
- * Dallas-owned landing chrome. It reuses Steve's shared `.cf-nav`, `.cf-skip` and
- * Button styles (imported once in the root layout) and surfaces the theme toggle,
- * but does not use Steve's `MainNav` component because that component hardcodes the
- * not-yet-built `/jobs` and `/saved` links. The wrapper bridges the top-level page
- * surface to the theme tokens so light/dark visibly affects the real landing page.
+ * Dallas-owned landing chrome. It uses Steve's shared `MainNav` (passing only the
+ * routes that exist today), `.cf-skip` skip link and theme toggle, and bridges the
+ * top-level page surface to the theme tokens so light/dark visibly affects the real
+ * landing page.
  */
 export function RootShell({ children }: { children: ReactNode }) {
   const pathname = usePathname() || '/';
-  const isActive = (href: string) =>
-    pathname === href || (href !== '/' && pathname.startsWith(`${href}/`));
   return (
     <div
       className="cf-root"
@@ -56,13 +54,7 @@ export function RootShell({ children }: { children: ReactNode }) {
           Career Forge
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          <nav className="cf-nav" aria-label="Main navigation">
-            {NAV_LINKS.map(({ href, label }) => (
-              <a key={href} href={href} aria-current={isActive(href) ? 'page' : undefined}>
-                {label}
-              </a>
-            ))}
-          </nav>
+          <MainNav currentPath={pathname} links={NAV_LINKS} />
           <ThemeToggle />
         </div>
       </header>
