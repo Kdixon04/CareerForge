@@ -1,0 +1,226 @@
+import { z } from 'zod';
+import { JobDraftSchema, JobPostingSchema, type JobDraft, type JobPosting } from '../../contracts';
+import { readBoundedBody, MAX_RAW_BODY_BYTES } from './read-bounded-body';
+
+/**
+ * Interface for Keyan's upcoming user-scoped database adapters in `src/lib/data/jobs.ts`.
+ *
+ * In accordance with AGENTS.md:
+ * - `src/lib/data/**` and `src/lib/supabase/**` are Keyan-owned.
+ * - `src/lib/jobs/**` and `src/app/api/jobs/**` are Dallas-owned.
+ * - Routes enforce caller authentication and delegate DB operations to Keyan's adapters.
+ * - Under RLS:
+ *     - `createPrivateJobImport` persists with `source = 'pasted'`, `status = 'private'`,
+ *       and caller's `user.id`.
+ *     - `getAuthorizedJob` returns the `JobPosting` if accessible under RLS, or `null`
+ *       if non-existent or belonging to another student (private).
+ */
+export interface JobDataAdapter {
+  createPrivateJobImport(draft: JobDraft): Promise<JobPosting>;
+  getAuthorizedJob(id: string): Promise<JobPosting | null>;
+}
+
+export interface AuthenticatedUser {
+  id: string;
+  email?: string;
+}
+
+export type GetUserFn = () => Promise<AuthenticatedUser | null>;
+
+export interface JobHandlerDependencies {
+  getUser?: GetUserFn;
+  adapter?: Partial<JobDataAdapter>;
+}
+
+/**
+ * Standard API error response helper conforming to AGENTS.md wire contract:
+ * `{ error: { code: string, message: string } }`
+ */
+function errorResponse(status: number, code: string, message: string): Response {
+  return new Response(JSON.stringify({ error: { code, message } }), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * Standard API success response helper conforming to AGENTS.md wire contract:
+ * `{ data: T }`
+ */
+function successResponse<T>(data: T, status: number = 200): Response {
+  return new Response(JSON.stringify({ data }), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Handles `POST /api/jobs/import` requests.
+ *
+ * Requirements:
+ * 1. Authenticates caller session; rejects signed-out requests with 401 UNAUTHENTICATED.
+ * 2. Bounds raw request body up to `MAX_RAW_BODY_BYTES` (100 KB) before JSON parsing.
+ * 3. Validates body against `JobDraftSchema`; rejects invalid or oversized descriptions with 400 INVALID_INPUT.
+ * 4. Checks adapter availability. If Keyan's real adapter is not available, fails closed
+ *    with 503 SERVICE_UNAVAILABLE (never pretends to persist or mocks saving).
+ * 5. Calls adapter to persist private job under RLS.
+ * 6. Returns 200 `{ data: JobPosting }` with server-derived ownership, `source: 'pasted'`,
+ *    and `status: 'private'`.
+ */
+export async function handleImportJob(
+  request: Request,
+  deps: JobHandlerDependencies = {},
+): Promise<Response> {
+  const requestId = crypto.randomUUID();
+
+  // 1. Authenticate caller session
+  if (!deps.getUser) {
+    // If no custom getUser is injected, attempt Supabase server client if available
+    try {
+      const { createSupabaseServerClient } = await import('../supabase/server');
+      const supabase = await createSupabaseServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        return errorResponse(401, 'UNAUTHENTICATED', 'Authentication required');
+      }
+    } catch {
+      return errorResponse(401, 'UNAUTHENTICATED', 'Authentication required');
+    }
+  } else {
+    const user = await deps.getUser();
+    if (!user) {
+      return errorResponse(401, 'UNAUTHENTICATED', 'Authentication required');
+    }
+  }
+
+  // 2. Bound raw request body before JSON parsing
+  const bodyResult = await readBoundedBody(request, MAX_RAW_BODY_BYTES);
+  if (!bodyResult.ok) {
+    return errorResponse(bodyResult.status, bodyResult.code, bodyResult.message);
+  }
+
+  const rawText = bodyResult.text.trim();
+  if (!rawText) {
+    return errorResponse(400, 'INVALID_INPUT', 'Request body is empty');
+  }
+
+  // 3. Safe JSON parsing of bounded body
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(rawText);
+  } catch {
+    return errorResponse(400, 'INVALID_INPUT', 'Request body must be valid JSON');
+  }
+
+  // 4. Validate input with JobDraftSchema
+  const draftResult = JobDraftSchema.safeParse(parsedJson);
+  if (!draftResult.success) {
+    const firstIssue = draftResult.error.issues[0];
+    const message = firstIssue
+      ? `${firstIssue.path.join('.') || 'field'}: ${firstIssue.message}`
+      : 'Invalid job draft data';
+    return errorResponse(400, 'INVALID_INPUT', message);
+  }
+
+  // 5. Check adapter availability
+  const createImportFn = deps.adapter?.createPrivateJobImport;
+  if (!createImportFn) {
+    // Fails closed if Keyan's adapter has not landed yet
+    return errorResponse(
+      503,
+      'SERVICE_UNAVAILABLE',
+      'Job persistence adapter is not available. Waiting for Keyan data adapter.',
+    );
+  }
+
+  // 6. Delegate to adapter
+  try {
+    const persisted = await createImportFn(draftResult.data);
+    const validated = JobPostingSchema.safeParse(persisted);
+    if (!validated.success) {
+      return errorResponse(503, 'SERVICE_UNAVAILABLE', 'Server returned malformed job data');
+    }
+
+    return successResponse(validated.data, 200);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unable to import job';
+    return errorResponse(503, 'SERVICE_UNAVAILABLE', message);
+  }
+}
+
+/**
+ * Handles `GET /api/jobs/[id]` requests.
+ *
+ * Requirements:
+ * 1. Authenticates caller session; rejects signed-out requests with 401 UNAUTHENTICATED.
+ * 2. Validates `id` parameter as a UUID. Malformed IDs return 404 NOT_FOUND.
+ * 3. Checks adapter availability. If Keyan's real adapter is not available, fails closed
+ *    with 503 SERVICE_UNAVAILABLE.
+ * 4. Queries authorized job through Keyan's adapter under RLS.
+ * 5. If the job does not exist OR is a private job belonging to another student,
+ *    returns an indistinguishable 404 NOT_FOUND (preventing existence probing).
+ * 6. Returns 200 `{ data: JobPosting }` on authorized access.
+ */
+export async function handleGetJob(
+  id: string,
+  deps: JobHandlerDependencies = {},
+): Promise<Response> {
+  // 1. Authenticate caller session
+  if (!deps.getUser) {
+    try {
+      const { createSupabaseServerClient } = await import('../supabase/server');
+      const supabase = await createSupabaseServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        return errorResponse(401, 'UNAUTHENTICATED', 'Authentication required');
+      }
+    } catch {
+      return errorResponse(401, 'UNAUTHENTICATED', 'Authentication required');
+    }
+  } else {
+    const user = await deps.getUser();
+    if (!user) {
+      return errorResponse(401, 'UNAUTHENTICATED', 'Authentication required');
+    }
+  }
+
+  // 2. Validate UUID format
+  if (!id || !UUID_REGEX.test(id)) {
+    return errorResponse(404, 'NOT_FOUND', 'Job not found');
+  }
+
+  // 3. Check adapter availability
+  const getJobFn = deps.adapter?.getAuthorizedJob;
+  if (!getJobFn) {
+    return errorResponse(
+      503,
+      'SERVICE_UNAVAILABLE',
+      'Job read adapter is not available. Waiting for Keyan data adapter.',
+    );
+  }
+
+  // 4. Query authorized job via adapter
+  try {
+    const job = await getJobFn(id);
+    if (!job) {
+      // Indistinguishable 404 for non-existent and foreign private jobs
+      return errorResponse(404, 'NOT_FOUND', 'Job not found');
+    }
+
+    const validated = JobPostingSchema.safeParse(job);
+    if (!validated.success) {
+      return errorResponse(503, 'SERVICE_UNAVAILABLE', 'Server returned malformed job data');
+    }
+
+    return successResponse(validated.data, 200);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unable to load job';
+    return errorResponse(503, 'SERVICE_UNAVAILABLE', message);
+  }
+}
