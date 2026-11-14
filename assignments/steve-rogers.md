@@ -1,5 +1,7 @@
 # Steve Rogers — student profile, saved applications, and design
 
+Current integration note (November 14, 2026): main has sign-in and a connected profile loader/save route. Profile fixture mode remains explicitly unsaved; the normal signed-in path needs database and account-isolation verification. PR #17's theme cleanup must preserve the connected save path. Older milestone notes below are historical and do not override current code or the [team handoff](../teammates.md).
+
 Read [AGENTS.md](../AGENTS.md) and the current [team handoff](../teammates.md) before editing. You own the student profile and saved-application experience through the UI and route layer. Keyan owns SQL and supplies user-scoped adapters; Dallas owns scaffold/shared schemas/auth shell and AI/job pages. Report exact cross-person contract or adapter needs to Dallas and the relevant owner in your handoff; do not change another owner's files.
 
 Known skills: English, Spanish, Python, a little Java, Excel; limited database experience; strengths in aesthetics/navigation and team coordination. React/TypeScript experience and availability remain TBD. Pair briefly on your first route; use shared adapters rather than writing migrations.
