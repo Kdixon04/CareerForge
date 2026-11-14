@@ -18,5 +18,8 @@ Use each account's normal Supabase Auth session and a user-scoped client. Do not
 4. A student can select a published employer job. The same student cannot select another employer's draft, a hidden listing, or an unpublished private import. A student who saved a listing can still read a paused copy as inactive.
 5. Calling `record_job_view(job_id)` as a student on a published employer job creates at most one `(job_id, viewer_user_id)` row even after refresh/retry. Anonymous users, employers, and unpublished jobs are rejected.
 6. Repeatedly saving the same job does not increase `current_saves`; unsaving removes the row and decrements the derived count.
+7. An ordinary authenticated client cannot insert a `resume_versions` row directly, cannot alter generated payload/fact snapshots, and can update only student-authored edits through the server path.
+8. A student cannot change a pasted/provider/Claude job from `private` to `published`, `paused`, or `hidden`; invalid job type/work-mode values are rejected.
+9. `deadline_verified` and `verification_status` cannot represent contradictory states; employer statistics reject non-employer callers.
 
 Record the exact command/UI path and result for each assertion. A passing UI flow is not enough: inspect returned rows and persisted state as well.

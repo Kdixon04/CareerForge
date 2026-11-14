@@ -28,7 +28,7 @@ Use a user-scoped Supabase client so RLS applies. Derive identity from the verif
 - `listAuthorizedJobs(filters)` and `getAuthorizedJob(jobId)`.
 - `createPrivateJobImport(input)`; the server assigns `source=pasted`, owner, `status=private`, and retrieval metadata.
 - `listOwnApplications()`, `saveApplication(jobId)`, `updateApplication(id, patch)`, and `removeApplication(id)`.
-- `createResumeVersion(jobId, generatedPayload, editedBullets, factSnapshot)` and own-version read/update operations. Generated payload and fact snapshot are immutable after insert.
+- `createResumeVersion(jobId, generatedPayload, editedBullets, factSnapshot)` and own-version read/update operations. Generated payload and fact snapshot are immutable after insert. The browser has no direct insert grant for `resume_versions`; creation must occur through a server-side, validated generation path using a privileged server client or a narrowly scoped RPC.
 - Employer-owned listing CRUD using `source=employer`, `employer_id`, and allowed statuses `draft|published|paused`.
 - `record_job_view(jobId)` RPC for a visible published employer job.
 - `get_employer_stats()` RPC; returns counts only for the authenticated employer's listings.
