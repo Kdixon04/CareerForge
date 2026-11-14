@@ -3,7 +3,10 @@
 .cf-jobs-shell { width: min(1040px, calc(100% - 3rem)); margin: 0 auto; padding-bottom: 3rem; }
 .cf-jobs-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.5rem 0; border-bottom: 1px solid var(--cf-border); margin-bottom: 2.5rem; }
 .cf-jobs-brand { color: var(--cf-text); text-decoration: none; font-size: 1.25rem; font-weight: 750; letter-spacing: -.035em; }
-.cf-jobs-brand:focus-visible { outline: 3px solid var(--cf-focus); outline-offset: 4px; }
+.cf-jobs-brand:focus-visible, .cf-jobs-back:focus-visible { outline: 3px solid var(--cf-focus); outline-offset: 4px; }
+.cf-jobs-back { color: var(--cf-muted); text-decoration: none; font-size: .95rem; min-height: 44px; display: inline-flex; align-items: center; }
+.cf-jobs-example-actions { margin: 1rem 0 0; }
+.cf-jobs-next { margin-top: 2rem; display: grid; gap: 1rem; justify-items: start; }
 .cf-jobs h1 { font-size: clamp(2.2rem, 5.5vw, 3.2rem); line-height: 1.1; letter-spacing: -.05em; margin: 0 0 1rem; }
 .cf-jobs h2 { font-size: 1.4rem; letter-spacing: -.03em; margin: 0 0 .75rem; }
 .cf-jobs-eyebrow { color: var(--cf-leather); font-weight: 750; letter-spacing: .12em; font-size: .72rem; margin: 0 0 .5rem; }
