@@ -1,0 +1,48 @@
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --cf-bg: #faf6ef;
+  --cf-surface: #ffffff;
+  --cf-text: #292723;
+  --cf-muted: #665b50;
+  --cf-accent: #f2b544;
+  --cf-on-accent: #292015;
+  --cf-border: #8c7966;
+  --cf-focus: #8a431e;
+  --cf-danger: #b12525;
+  --cf-leather: #843c20;
+  --cf-subtle: #efe7da;
+  --cf-radius: 0.75rem;
+  --cf-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --cf-bg: #1c211f;
+  --cf-surface: #272e2b;
+  --cf-text: #faf0dd;
+  --cf-muted: #c5bba9;
+  --cf-accent: #f2b544;
+  --cf-on-accent: #292015;
+  --cf-border: #958b78;
+  --cf-focus: #f2b544;
+  --cf-danger: #ffaaaa;
+  --cf-leather: #e6a27b;
+  --cf-subtle: #333d37;
+}
+
+/* Usable first paint even if scripts are blocked; explicit choices take precedence. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --cf-bg: #1c211f;
+    --cf-surface: #272e2b;
+    --cf-text: #faf0dd;
+    --cf-muted: #c5bba9;
+    --cf-border: #958b78;
+    --cf-focus: #f2b544;
+    --cf-danger: #ffaaaa;
+    --cf-leather: #e6a27b;
+    --cf-subtle: #333d37;
+  }
+}
