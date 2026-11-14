@@ -1,6 +1,6 @@
 # Career Forge — shared agent instructions
 
-Read this file completely, then your linked assignment before editing. These documents describe the agreed implementation target; they do not claim the application already exists. Follow current human direction. Resolve security or shared-contract conflicts with the relevant owner; continue independent work while blocked. Record small reversible assumptions in your handoff instead of stopping for every detail.
+Before editing, read this file completely, the current [team handoff](teammates.md), and your owner's file in [assignments/](assignments/). AGENTS.md defines shared rules and file ownership; teammates.md records the current handoff and cross-person dependencies; your owner's assignment defines that person's work. Human instructions take precedence. Recheck teammates.md at the start of each work session and when integrating another person's changes. These documents describe the agreed implementation target; they do not claim the application already exists. Resolve security or shared-contract conflicts with the relevant owner; continue independent work while blocked. Record small reversible assumptions in your handoff instead of stopping for every detail.
 
 ## Mission, scope, and current state
 
@@ -25,7 +25,7 @@ One writer per file at a time. Review ownership is not exclusive implementation 
 
 | Paths (each path is literal; ** means descendants) | Owner |
 |---|---|
-| AGENTS.md, README.md, src/contracts/**, src/lib/claude/**, src/lib/jobs/** | Dallas |
+| AGENTS.md, teammates.md, assignments/dallas-agent-coordination.md, README.md, src/contracts/**, src/lib/claude/**, src/lib/jobs/** | Dallas |
 | src/app/layout.tsx, src/app/page.tsx, src/app/(auth)/** | Dallas |
 | src/app/(student)/jobs/**, src/app/(student)/match/** | Dallas |
 | src/app/api/jobs/**, src/app/api/resume/** | Dallas |

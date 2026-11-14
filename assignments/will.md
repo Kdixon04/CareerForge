@@ -1,6 +1,6 @@
 # Will — demo, product explanation, and user-flow QA
 
-Read [AGENTS.md](../AGENTS.md) first. You own the 60–90 second YouTube-style demo video, fictional demo materials, and an independent user walkthrough. C/C++ and electrical engineering are known strengths; web/video-tool experience and availability remain TBD. You need not learn a web framework to contribute.
+Read [AGENTS.md](../AGENTS.md) and the current [team handoff](../teammates.md) before editing. You own the 60–90 second YouTube-style demo video, fictional demo materials, and an independent user walkthrough. C/C++ and electrical engineering are known strengths; web/video-tool experience and availability remain TBD. You need not learn a web framework to contribute. Report cross-person blockers and reproducible findings to Dallas and the affected owner in your handoff; do not change another owner's files.
 
 ## Ownership and first task
 
