@@ -4,6 +4,9 @@ Read [AGENTS.md](../AGENTS.md) and the current [team handoff](../teammates.md) b
 
 Known skills: English, Spanish, Python, a little Java, Excel; limited database experience; strengths in aesthetics/navigation and team coordination. React/TypeScript experience and availability remain TBD. Pair briefly on your first route; use shared adapters rather than writing migrations.
 
+## Adapter preparation checkpoint — November 14, 2026
+
+See [adapter preparation/evidence handoff](../src/components/ui/student-data/HANDOFF.md). New branch feature/steve-adapter-preparation preserves #17/#29 unchanged. Complete local consumer code: typed interfaces/strict DTOs, prepared fail-closed handler factories, loading/save/retry/reset/error/dirty UI and accessible focus. Prepared only: real adapter mapping, GET/PUT/application endpoint adoption and a Dallas-review CI workflow. Mocked only: memory storage, fictional session/role aliases, two-user HTTP and reload tests. Not verified: real saving, production isolation/RLS, live security, hosted A/B or deployment. Keyan still owns atomic/versioned data operations; Dallas owns isolated A/B credentials/environment, shared-contract/CI approval and dev dependency remediation. Main's newly added sequential PATCH is not atomic and has been reported, not certified. Public saved examples remain stateless; the separate lab only retains data for its process lifetime. Full details, commands, blockers and file inventory are in the handoff.
 ## Paths and first slice
 
 Owned: src/app/(student)/profile/**, src/app/(student)/saved/**, src/app/api/profile/**, src/app/api/applications/**, src/components/ui/**, src/components/nav/**, src/components/theme/**, src/styles/**, src/app/globals.css, public/brand/**, tests/e2e/steve-*.spec.ts, tests/unit/steve-*.test.ts.

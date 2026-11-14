@@ -1,5 +1,8 @@
 # Steve design and profile handoff
 
+## Current adapter-preparation branch
+
+The [adapter preparation handoff](student-data/HANDOFF.md) supersedes historical backend/status claims below on feature/steve-adapter-preparation. Main now has auth clients and a sequential profile PATCH, but it is not the approved atomic adapter. New local consumer interfaces/handler factories, injectable UI and an opt-in memory-only lab are prepared; production persistence/security/A-B verification remain blocked. PR #17 and PR #29 were not modified. CI contract assertions join existing test discovery; active lab/scanner workflow changes await Dallas approval. The six inherited dev audit findings remain explicit; production audit is clean.
 ## State and boundaries
 
 CareerForge main has the Next.js 15/React 18 scaffold, provisional [contracts](../../contracts/) and [fictional examples](../../data/examples.ts). This branch adds light/dark theme components, navigation, Button/Input/Textarea and a real `/profile` route backed by fictional data. Its form supports editable facts and validation; **Save profile is disabled** until Keyan supplies a verified, user-scoped adapter. Reload discards edits. There is no real auth, database persistence or live AI flow here. This branch adds an explicitly fictional, in-memory `/saved` tracking preview; see the [saved UI handoff](../../app/(student)/saved/HANDOFF.md) for current tests and backend blockers. The port-4317 component harness is a separate fixture; its `/saved` page is only an empty-state example.
