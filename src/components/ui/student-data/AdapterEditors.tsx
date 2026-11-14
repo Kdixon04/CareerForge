@@ -46,6 +46,7 @@ function ApplicationEditor({adapter,item,onChange,onRemove,onDirty}:{adapter:Stu
 }
 export function ApplicationsAdapterEditor({adapter,onDirtyChange}:{adapter?:StudentDataAdapter;onDirtyChange?:(dirty:boolean)=>void}){
   const [items,setItems]=useState<Application[]|null>(null),[error,setError]=useState(''),[load,setLoad]=useState(0),[dirtyIds,setDirtyIds]=useState<Record<string,boolean>>({});
+  const loadError=useRef<HTMLDivElement>(null);useEffect(()=>{if(error)loadError.current?.focus();},[error]);
   const dirty=Object.values(dirtyIds).some(Boolean);useUnsaved(dirty);useEffect(()=>{onDirtyChange?.(dirty);},[dirty,onDirtyChange]);
   const dirtyCallback=useRef((id:string,value:boolean)=>setDirtyIds(current=>current[id]===value?current:{...current,[id]:value})).current;
   useEffect(()=>{let active=true;setItems(null);setError('');setDirtyIds({});if(!adapter){setError('Adapter not connected. Applications are unavailable.');return;}
@@ -53,6 +54,6 @@ export function ApplicationsAdapterEditor({adapter,onDirtyChange}:{adapter?:Stud
   },[adapter,load]);
   return <section aria-label="Application adapter integration"><h2>Application adapter integration</h2>{adapter?.kind==='test-double'&&<p>TEST DOUBLE: application updates exist only in lab server memory.</p>}
     <Button id="adapter-app-refresh" variant="secondary" disabled={dirty} onClick={()=>setLoad(n=>n+1)}>Reload applications</Button>
-    {error?<div role="alert"><p>{error}</p><Button onClick={()=>setLoad(n=>n+1)}>Retry application load</Button></div>:!items?<p role="status">Loading applications through adapter…</p>:items.length===0?<p role="status">No applications returned by this adapter.</p>:items.map(item=><ApplicationEditor key={item.id} item={item} adapter={adapter!} onDirty={dirtyCallback} onChange={next=>setItems(current=>current!.map(old=>old.id===next.id?next:old))} onRemove={()=>{setItems(current=>current!.filter(old=>old.id!==item.id));dirtyCallback(item.id,false);}}/>)}
+    {error?<div ref={loadError} tabIndex={-1} role="alert"><p>{error}</p><Button onClick={()=>setLoad(n=>n+1)}>Retry application load</Button></div>:!items?<p role="status">Loading applications through adapter…</p>:items.length===0?<p role="status">No applications returned by this adapter.</p>:items.map(item=><ApplicationEditor key={item.id} item={item} adapter={adapter!} onDirty={dirtyCallback} onChange={next=>setItems(current=>current!.map(old=>old.id===next.id?next:old))} onRemove={()=>{setItems(current=>current!.filter(old=>old.id!==item.id));dirtyCallback(item.id,false);}}/>)}
   </section>;
 }

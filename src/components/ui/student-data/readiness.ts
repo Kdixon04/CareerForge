@@ -10,8 +10,8 @@ export function liveContractReadiness(environment:Record<string,string|undefined
   const missing=required.filter(name=>!environment[name]);
   if(environment.STEVE_ISOLATED_PROJECT!=='yes'&&!missing.includes('STEVE_ISOLATED_PROJECT'))missing.push('STEVE_ISOLATED_PROJECT');
   try{const url=new URL(environment.NEXT_PUBLIC_SUPABASE_URL??'');if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.pathname!=='/')throw new Error();}catch{if(!missing.includes('NEXT_PUBLIC_SUPABASE_URL'))missing.push('NEXT_PUBLIC_SUPABASE_URL');}
-  const key=environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY??'';if(key.startsWith('sb_secret_')&&!missing.includes('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'))missing.push('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
-  if(environment.E2E_STUDENT_A_EMAIL===environment.E2E_STUDENT_B_EMAIL&&!missing.includes('E2E_STUDENT_B_EMAIL'))missing.push('E2E_STUDENT_B_EMAIL');
+  const key=environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY??'';if(!/^sb_publishable_[A-Za-z0-9_-]+$/.test(key)&&!missing.includes('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'))missing.push('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
+  if(environment.E2E_STUDENT_A_EMAIL?.trim().toLowerCase()===environment.E2E_STUDENT_B_EMAIL?.trim().toLowerCase()&&!missing.includes('E2E_STUDENT_B_EMAIL'))missing.push('E2E_STUDENT_B_EMAIL');
   return {state:missing.length?'configuration-required' as const:'real-driver-required' as const,missing};
 }
 // Configuration alone never enables real writes or substitutes fictional data.

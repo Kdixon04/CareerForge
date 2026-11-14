@@ -32,3 +32,25 @@ it('HTTP application handlers retain owner checks and unchanged state on foreign
   expect((await b.DELETE(request('/applications','DELETE'),saved.data.id)).status).toBe(200);
   expect((await (await a.GET(request('/applications'))).json()).data).toEqual([saved.data]);expect((await (await b.GET(request('/applications'))).json()).data).toEqual([]);
 });
+
+it('authentication/role failures cover every mutation and never expose or cache private errors',async()=>{
+  const h=createMemoryHarness(),before=await h.a.getProfile(),id=crypto.randomUUID();
+  for(const code of ['UNAUTHENTICATED','FORBIDDEN'] as const){
+    const resolver=async()=>{throw new AdapterError(code);};
+    const p=createProfileHandlers(resolver),a=createApplicationHandlers(resolver);
+    const responses=await Promise.all([
+      p.GET(request('/profile')),p.PUT(request('/profile','PUT',{})),
+      a.GET(request('/applications')),a.POST(request('/applications','POST',{})),
+      a.PATCH(request('/applications','PATCH',{}),id),a.DELETE(request('/applications','DELETE'),id),
+    ]);
+    for(const response of responses){
+      expect(response.status).toBe(code==='UNAUTHENTICATED'?401:403);
+      expect(response.headers.get('cache-control')).toBe('private, no-store');
+      expect(response.headers.get('vary')).toBe('Cookie, Authorization');
+      expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+      expect(response.headers.get('x-request-id')).toMatch(/^[0-9a-f-]{36}$/);
+      expect(await response.json()).toEqual({error:{code,message:new AdapterError(code).message}});
+    }
+  }
+  expect(await h.a.getProfile()).toEqual(before);expect(await h.a.listApplications()).toEqual([]);
+});

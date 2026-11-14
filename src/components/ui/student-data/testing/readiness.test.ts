@@ -4,3 +4,9 @@ it('even complete fictional environment configuration requires an approved real 
 it('unsafe origins, secret keys, non-isolated targets and duplicate users cannot satisfy live readiness',()=>{for(const patch of [{NEXT_PUBLIC_SUPABASE_URL:'http://fictional.supabase.co'},{NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_secret_not_a_real_key'},{STEVE_ISOLATED_PROJECT:'no'},{E2E_STUDENT_B_EMAIL:'a@example.test'}])expect(liveContractReadiness({...fictionalConfiguration(),...patch}).state).toBe('configuration-required');});
 it('memory data survives reconnect but does not survive a new test-server store',async()=>{const first=createMemoryHarness(),profile=await first.a.getProfile();await first.a.putProfile({displayName:'Temporary lab value',field:null,facts:[],expectedUpdatedAt:profile.updatedAt});expect((await first.reconnectA().getProfile()).displayName).toBe('Temporary lab value');expect((await createMemoryHarness().a.getProfile()).displayName).toBe('Fictional Student A');});
 it('the test-double factory itself is disabled in production',()=>{vi.stubEnv('NODE_ENV','production');try{expect(()=>createMemoryHarness()).toThrow('disabled in production');}finally{vi.unstubAllEnvs();}});
+
+it('live readiness rejects unrecognized keys and email aliases for the same account',()=>{
+  for(const patch of [{NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'eyJ_not_a_real_legacy_token'}, {E2E_STUDENT_B_EMAIL:' A@EXAMPLE.TEST '}]) {
+    expect(liveContractReadiness({...fictionalConfiguration(),...patch}).state).toBe('configuration-required');
+  }
+});

@@ -1,3 +1,4 @@
+import { checkedAdapter } from '../checked-adapter';
 import { AdapterError,ERROR_STATUS,ownProfile,ownApplication,type ErrorCode,type StudentDataAdapter } from '../adapter-contract';
 export type LabFault='normal'|'load-error'|'load-auth'|'load-forbidden'|'corrupt-load'|'save-network'|'save-validation'|'save-auth'|'save-forbidden'|'save-conflict'|'slow-save';
 // TEST TRANSPORT ONLY. Header identities are fictional and provide no real authentication.
@@ -15,5 +16,5 @@ export function labTransport(subjectId:string,user:'a'|'b',fault:()=>LabFault):S
     saveApplication:async input=>ownApplication(adapter,await call('applications','POST',input)),
     patchApplication:async(id,input)=>ownApplication(adapter,await call(`applications/${id}`,'PATCH',input)),
     removeApplication:async id=>{const data=await call(`applications/${id}`,'DELETE') as {id?:unknown}|null;if(data?.id!==id)throw new AdapterError('INVALID_DATA');return{id};},
-  };return adapter;
+  };return checkedAdapter(adapter);
 }

@@ -58,3 +58,17 @@ test('TEST DOUBLE unsaved profile edits trigger the native leave warning and can
   await page.goto('/');const editor=profile(page),name=editor.getByRole('textbox',{name:'Display name',exact:true});await expect(name).toBeVisible();await name.click();await name.fill('Unsaved leave protection');
   await expect(page.getByRole('combobox',{name:'Fictional user',exact:true})).toBeDisabled();const dialogPromise=page.waitForEvent('dialog');await page.close({runBeforeUnload:true});const dialog=await dialogPromise;expect(dialog.type()).toBe('beforeunload');await dialog.dismiss();expect(page.isClosed()).toBe(false);await expect(name).toHaveValue('Unsaved leave protection');await editor.getByRole('button',{name:'Discard unsaved profile changes',exact:true}).click();await expect(editor.getByText('Unsaved profile changes in this page.',{exact:true})).toHaveCount(0);
 });
+
+test('TEST DOUBLE application load errors receive focus and retry returns the empty state', async ({page}) => {
+  await page.goto('/');
+  const region = applications(page);
+  await expect(region.getByRole('button', {name:'Reload applications', exact:true})).toBeEnabled();
+  const fault = page.getByRole('combobox', {name:'Test-double behavior', exact:true});
+  await fault.selectOption('load-auth');
+  await region.getByRole('button', {name:'Reload applications', exact:true}).click();
+  await expect(region.getByRole('alert')).toBeFocused();
+  await expect(region.getByRole('alert')).toContainText('Sign in again');
+  await fault.selectOption('normal');
+  await region.getByRole('button', {name:'Retry application load', exact:true}).click();
+  await expect(region.getByRole('status')).toHaveText('No applications returned by this adapter.');
+});
