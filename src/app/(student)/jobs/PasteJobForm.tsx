@@ -170,8 +170,8 @@ export function PasteJobForm() {
               </p>
             )}
             <p className="cf-jobs-card-note">
-              This preview stays in your browser until secure import is connected. Job detail and résumé review are
-              fixture-backed today and do not load unsaved paste text yet.
+              This preview stays in your browser until secure import is connected. Parse returns a preview id that does
+              not open a detail page yet; use the fictional example job on this page to walk through detail and match.
             </p>
             <p className="cf-jobs-example-actions">
               <a className="cf-button cf-button--secondary" href={`/jobs/${preview.id}`}>
