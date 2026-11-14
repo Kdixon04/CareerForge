@@ -10,15 +10,19 @@ Main has a Next.js landing page, provisional [contracts](src/contracts/), [ficti
 
 **Ownership exception:** Steve unavailable 2026-11-14; Dallas patched MainNav, root-shell wiring, and steve-shell.spec.ts rebase. The AGENTS.md ownership table still stands for all future work.
 
-**Integration status — 2026-11-14 (~1:20 Denver):** `main` at `38510cb`. Prep hub UI (#45) and inert prep API routes (#47) merged (fixture / fail-closed). Prior student-path merges include #44 import/read, filters #42, calendar #41, handlers #40. **`src/lib/data/**` not on main yet** — blocking private job persistence, profile save, and résumé adapters ([keyan-ask.md](assignments/keyan-ask.md)). **Deployed smoke: NOT RUN** until a human completes [vercel-supabase-deploy-checklist.md](assignments/vercel-supabase-deploy-checklist.md) (no secrets in Git).
+**Integration status — 2026-11-14 (~1:50 Denver):** `main` at `d0391d8`. Merged since prior handoff: [#48](https://github.com/Kdixon04/CareerForge/pull/48) (RootShell student nav + deploy/docs) and [#50](https://github.com/Kdixon04/CareerForge/pull/50) (inert fail-closed résumé suggest/get/patch). Confirmed on main: `src/app/(student)/layout.tsx`, `src/app/api/resume/**`. Prep hub (#45/#47) and private import/read remain inert/fail-closed. **`src/lib/data/**` still not on main** — see exact adapter signatures in [keyan-adapter-impl-prompt.md](assignments/keyan-adapter-impl-prompt.md); honest demo claims in [judges-feature-list.md](assignments/judges-feature-list.md).
+
+**PR [#49](https://github.com/Kdixon04/CareerForge/pull/49) (`feat/persist-pasted-jobs`) — NOT MERGE READY:** open, `mergeable=CONFLICTING` vs `main`, **no CI checks reported** (0 check runs on head). Diff is only `PasteJobForm.tsx` + new `POST /api/jobs` (direct Supabase insert); it does **not** add fail-closed-safe `src/lib/data/jobs` adapters and conflicts with main’s existing inert `POST /api/jobs/import`. Do **not** merge; do **not** flip persistence flags. Close or rewrite after Keyan ships adapters.
+
+**Deployed smoke: NOT RUN** until a human completes [vercel-supabase-deploy-checklist.md](assignments/vercel-supabase-deploy-checklist.md) (no secrets in Git).
 
 **Next 90 minutes (by owner):**
 
-- **Dallas:** Human runs deploy checklist with Keyan; mirror `.env.local` → Vercel; merge Keyan `src/lib/data` PR when green; post-deploy smoke (sign-in → profile → `/jobs`); ping Will with URL + [WILL-VIDEO-SCRIPT.md](demo/WILL-VIDEO-SCRIPT.md).
-- **Keyan:** Confirm migrations `20261113200000` + `20261114091500` on demo Supabase; seed ≥1 fictional **published** employer job; ship **`src/lib/data/jobs.ts`** first, profile second, résumé if slack; Supabase Auth redirect URLs for `APP_URL` + Vercel hosts.
-- **Steve (Dallas nav patch):** Shared student nav (Profile, Jobs, Saved, Calendar) on all student routes; job detail → Match/Prep CTAs; mobile/light-dark pass on profile + jobs.
-- **Will:** Lock narration from demo table below; record after deploy smoke ~2:30; fictional student only; label FIXTURE rows on screen.
-- **Antigravity / Codex:** Wire import/GET when `jobs.ts` lands; résumé routes when adapter exists; integrator merges only—no env invention.
+- **Dallas:** Keep import/resume routes fail-closed; do not merge #49; after Keyan lands `src/lib/data/jobs` (+ résumé if ready) with green CI, enable one-line adapter wiring only—no persistence flag flips until review; human deploy checklist + smoke; ping Will with URL + [WILL-VIDEO-SCRIPT.md](demo/WILL-VIDEO-SCRIPT.md).
+- **Keyan:** Close/rewrite #49; implement `src/lib/data/jobs.ts` (+ résumé adapters) per [keyan-adapter-impl-prompt.md](assignments/keyan-adapter-impl-prompt.md) with user-scoped client/RLS; confirm migrations + seed ≥1 published employer job; Auth redirect URLs.
+- **Steve (Dallas nav patch):** Shared student nav shipped via #48; further UI polish only if bandwidth.
+- **Will:** Lock narration from demo table / [judges-feature-list.md](assignments/judges-feature-list.md); record after deploy smoke; fictional student only; label FIXTURE rows on screen.
+- **Antigravity / Codex:** Enable import/GET/résumé only when Keyan adapters land; integrator merges only—no env invention.
 
 **Proposed scope for 4pm (confirm with human/Keyan):** saved-application **persistence CUT** → labeled fixture on `/saved` (Steve unavailable); **employer journey CUT**; Keyan prioritizes `src/lib/data/jobs.ts` + résumé adapters, then deploy env. Private import + résumé reload are **stretch-to-core** if adapters land in time.
 
