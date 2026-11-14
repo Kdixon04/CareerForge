@@ -20,6 +20,7 @@ jobs:
     timeout-minutes: 15
     env:
       CAREERFORGE_E2E_PROFILE_FIXTURE: '1'
+      CAREERFORGE_E2E_JOBS_FIXTURE: '1'	
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
