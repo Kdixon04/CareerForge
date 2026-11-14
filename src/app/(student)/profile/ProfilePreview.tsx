@@ -2,7 +2,6 @@
 
 import type { StudentProfile } from '../../../contracts';
 import { StudentProfileSchema } from '../../../contracts';
-import { ThemeToggle } from '../../../components/theme/ThemeToggle';
 import { ProfileForm } from './ProfileForm';
 import { ProfileSaveError, type ProfileDraft } from './profile-model';
 
@@ -37,15 +36,8 @@ export function ProfilePreview({
 }) {
   return (
     <div className="cf-profile">
-        <a className="cf-skip" href="#profile-main">Skip to profile</a>
-
         <div className="cf-profile-shell">
-          <header className="cf-profile-header">
-            <a href="/" className="cf-profile-brand">Career Forge</a>
-            <ThemeToggle />
-          </header>
-
-          <main id="profile-main" tabIndex={-1}>
+          <main id="main" tabIndex={-1}>
             <p className="cf-profile-eyebrow">YOUR PROFILE</p>
             <h1>Start with your story.</h1>
             <p className="cf-profile-intro">

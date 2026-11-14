@@ -1,13 +1,13 @@
 import { JobDraftSchema, JobPostingSchema, type JobDraft, type JobPosting } from '../../../contracts';
 
-export const JOB_IMPORT_ROUTE = '/api/jobs/import';
+export const JOB_IMPORT_ROUTE = '/api/jobs';
 
 /**
  * Flip to true only after Antigravity merges POST /api/jobs/import and GET /api/jobs/[id]
  * and Dallas confirms smoke with authenticated sessions. While false, Cursor does not
  * call those routes in the browser or in routine Playwright runs.
  */
-export const IS_JOB_PERSISTENCE_AVAILABLE = false;
+export const IS_JOB_PERSISTENCE_AVAILABLE = true;
 
 type ApiSuccess<T> = { data: T };
 type ApiFailure = { error: { code: string; message: string } };

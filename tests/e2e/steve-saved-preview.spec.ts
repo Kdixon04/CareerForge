@@ -9,7 +9,7 @@ for(const viewport of [{width:390,height:844},{width:1280,height:800}]) for(cons
     await expect(page.locator('html')).toHaveAttribute('data-theme',colorScheme);
     await expect(page.getByRole('complementary',{name:'Saved preview limitations'})).toContainText('nothing is saved');
     await expect(page.getByRole('complementary',{name:'Saved preview limitations'})).toContainText('reset on reload');
-    await page.keyboard.press('Tab'); await expect(page.getByRole('link',{name:'Skip to saved preview'})).toBeFocused();
+    await page.keyboard.press('Tab'); await expect(page.getByRole('link',{name:'Skip to content',exact:true})).toBeFocused();
     const open=page.getByRole('region',{name:'Fictional Solar Internship',exact:true});
     const paused=page.getByRole('region',{name:'Fictional Design Assistant',exact:true});
     const hidden=page.getByRole('region',{name:'Unavailable fictional listing',exact:true});
@@ -36,7 +36,7 @@ for(const viewport of [{width:390,height:844},{width:1280,height:800}]) for(cons
       for(const ratio of ratios) expect(ratio,`${selector} text contrast`).toBeGreaterThanOrEqual(4.5);
     }
     await page.screenshot({path:testInfo.outputPath(`saved-${viewport.width}-${colorScheme}.png`),fullPage:true,scale:'css'});
-    await page.getByRole('link',{name:'Career Forge',exact:true}).scrollIntoViewIfNeeded();
+    await page.getByRole('link',{name:'Career Forge home',exact:true}).scrollIntoViewIfNeeded();
     await page.screenshot({path:testInfo.outputPath(`saved-viewport-${viewport.width}-${colorScheme}.png`),scale:'css'});
     await page.reload();
     await expect(open.getByRole('combobox',{name:'Application status',exact:true})).toHaveValue('saved');
@@ -49,7 +49,7 @@ for(const viewport of [{width:390,height:844},{width:1280,height:800}]) for(cons
     await expect(page.getByRole('heading',{name:'No applications in this preview.'})).toBeVisible();
     const reset=page.getByRole('button',{name:'Reset fictional examples',exact:true}); await reset.click(); await reset.click();
     await expect(page.getByRole('button',{name:'Remove from preview',exact:true})).toHaveCount(3);
-    const toggle=page.getByRole('button',{name:'Dark theme',exact:true}); await toggle.focus(); await toggle.press('Space');
+    const toggle=page.locator('.cf-root > header').getByRole('button',{name:'Dark theme',exact:true}); await toggle.focus(); await toggle.press('Space');
     const opposite=colorScheme==='light'?'dark':'light'; await expect(page.locator('html')).toHaveAttribute('data-theme',opposite);
     await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Profile',exact:true}).click();
     await expect(page.getByRole('heading',{name:'Start with your story.'})).toBeVisible(); await expect(page.locator('html')).toHaveAttribute('data-theme',opposite);

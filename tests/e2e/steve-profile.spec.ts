@@ -21,7 +21,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       await expect(page.getByRole('button', { name: 'Save profile', exact: true })).toBeDisabled();
       await expect(page.getByRole('complementary', { name: 'Preview limitations' })).toContainText('reset on reload');
       await page.keyboard.press('Tab');
-      await expect(page.getByRole('link', { name: 'Skip to profile' })).toBeFocused();
+      await expect(page.getByRole('link', { name: 'Skip to content', exact: true })).toBeFocused();
       const name = page.getByRole('textbox', { name: 'Display name', exact: true });
       await name.fill('   ');
       await page.getByRole('button', { name: 'Check profile' }).click();

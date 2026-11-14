@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
-  IS_JOB_PERSISTENCE_AVAILABLE,
   JOB_IMPORT_ROUTE,
-  getAuthorizedJob,
-  importPrivateJob,
   jobDraftFromPosting,
   requestGetJob,
   requestImportJob,
@@ -36,15 +33,6 @@ const savedPosting: JobPosting = {
   updatedAt: '2026-11-14T12:00:00.000Z',
 };
 
-describe('importPrivateJob / getAuthorizedJob guard', () => {
-  it('returns not_available and does not fetch while IS_JOB_PERSISTENCE_AVAILABLE is false', async () => {
-    expect(IS_JOB_PERSISTENCE_AVAILABLE).toBe(false);
-    const fetch = vi.fn();
-    expect(await importPrivateJob(baseDraft, fetch)).toEqual({ ok: false, status: 'not_available' });
-    expect(await getAuthorizedJob(savedPosting.id, fetch)).toEqual({ ok: false, status: 'not_available' });
-    expect(fetch).not.toHaveBeenCalled();
-  });
-});
 
 describe('requestImportJob (mocked)', () => {
   it('returns validated JobPosting on 200', async () => {

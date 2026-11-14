@@ -24,7 +24,7 @@ for (const viewport of [{ width:390,height:844 },{ width:1280,height:800 }]) {
       await assertTheme(opposite);
       await page.reload(); await assertTheme(opposite);
       await toggle().focus(); await toggle().press('Space'); await assertTheme(colorScheme);
-      await page.getByRole('link',{name:'Career Forge',exact:true}).click();
+      await page.getByRole('link',{name:'Career Forge home',exact:true}).click();
       await expect(page.getByRole('heading',{name:'Turn what you’ve learned into what’s next.'})).toBeVisible();
       await assertTheme(colorScheme); await page.reload(); await assertTheme(colorScheme);
       expect(await page.evaluate(() => Object.keys(localStorage))).toEqual(['careerforge-theme']);
