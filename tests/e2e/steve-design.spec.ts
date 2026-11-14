@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 // Component fixture only. This suite makes no database/auth/persistence claims.
 const baseURL = process.env.STEVE_PREVIEW_URL ?? 'http://127.0.0.1:4317';
+test.skip(process.env.STEVE_COMPONENT_TESTS !== '1', 'Component harness required; use Steve browser-check.mjs.');
 
 for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
   for (const colorScheme of ['light', 'dark'] as const) {

@@ -81,7 +81,7 @@ test('both themes define readable text, action, border, error and focus colors',
   const css = existsSync(path) ? readFileSync(path, 'utf8') : '';
   for (const theme of ['light', 'dark']) {
     const block = css.match(new RegExp(`\\[data-theme="${theme}"\\]\\s*\\{([^}]+)`))?.[1] ?? '';
-    const tokens = Object.fromEntries([...block.matchAll(/--cf-([\w-]+):\s*(#[\da-f]{6})/gi)].map(m => [m[1], m[2]]));
+    const tokens = Object.fromEntries(Array.from(block.matchAll(/--cf-([\w-]+):\s*(#[\da-f]{6})/gi), m => [m[1], m[2]]));
     for (const key of ['bg', 'surface', 'text', 'muted', 'accent', 'on-accent', 'border', 'focus', 'danger']) {
       assert.ok(tokens[key], `${theme} must define --cf-${key}`);
     }
