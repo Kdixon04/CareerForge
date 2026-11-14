@@ -39,10 +39,6 @@
 .cf-jobs-card-source { overflow-wrap: anywhere; margin: .5rem 0; }
 .cf-jobs-card-source a { color: var(--cf-focus); }
 .cf-jobs-card-note { color: var(--cf-muted); font-size: .85rem; margin: .75rem 0 0; }
-.cf-jobs-brand:focus-visible, .cf-jobs-back:focus-visible { outline: 3px solid var(--cf-focus); outline-offset: 4px; }
-.cf-jobs-back { color: var(--cf-muted); text-decoration: none; font-size: .95rem; min-height: 44px; display: inline-flex; align-items: center; }
-.cf-jobs-example-actions { margin: 1rem 0 0; }
-.cf-jobs-next { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
 
 @media (max-width: 760px) {
   .cf-jobs-shell { width: calc(100% - 2rem); }

@@ -170,7 +170,13 @@ export function PasteJobForm() {
               </p>
             )}
             <p className="cf-jobs-card-note">
-              This preview stays in your browser. Secure import and AI résumé suggestions are not connected yet.
+              This preview stays in your browser until secure import is connected. Job detail and résumé review are
+              fixture-backed today and do not load unsaved paste text yet.
+            </p>
+            <p className="cf-jobs-example-actions">
+              <a className="cf-button cf-button--secondary" href={`/jobs/${preview.id}`}>
+                Continue to job detail (fixture-backed)
+              </a>
             </p>
           </article>
         ) : (
