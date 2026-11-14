@@ -2,6 +2,8 @@
 
 This divides only [Dallas's assignment](dallas.md). Read [AGENTS.md](../AGENTS.md) and [teammates.md](../teammates.md) first. Keyan, Steve, and Will retain their own files and decisions. Dallas integrates their handoffs; no AI tool edits the shared status file independently.
 
+Start with the short task brief for your tool: [Codex](dallas-codex.md), [Cursor](dallas-cursor.md), or [Antigravity](dallas-antigravity.md).
+
 | Tool | Dallas-owned work and exclusive paths |
 |---|---|
 | Codex | Shared `src/contracts/**`, dependencies/configuration (`package.json`, lockfile, framework/CI), Zod security update, integration, and Dallas end-to-end tests. |
@@ -12,7 +14,7 @@ Codex alone changes `src/contracts/**`, `package.json`, and the lockfile among t
 
 ## First slices and integration
 
-1. **Codex:** resolve the Zod advisory before external request parsing, confirm the contract with Keyan, and publish a tested schema/config slice.
+1. **Codex:** integrate Steve's existing theme/navigation in the root shell and test it in the actual app; resolve the Zod advisory and revalidate contracts before external request parsing.
 2. **Antigravity:** test and implement validated pasted-job import/read, then evidence-linked résumé suggest/read/edit routes using Keyan's user-scoped adapters. Mock Claude in routine tests.
 3. **Cursor:** build paste/job detail and résumé review/edit UI against fictional examples, then connect the working routes. Keep search clearly optional.
 4. **Codex:** integrate small route and UI slices in that order, add Dallas's end-to-end test for paste → suggestions → edit/save → reload, and run it at phone and desktop widths. Add live discovery only after that journey works; then test it separately.
