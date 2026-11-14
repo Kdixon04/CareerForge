@@ -10,4 +10,8 @@ describe('resume contract', () => {
     const bad = { ...exampleResume, generatedBullets: [{ ...exampleResume.generatedBullets[0], evidence: [] }] };
     expect(ResumeVersionSchema.safeParse(bad).success).toBe(false);
   });
+  it('rejects evidence identifiers absent from the saved fact snapshot', () => {
+    const bad = { ...exampleResume, generatedBullets: [{ ...exampleResume.generatedBullets[0], evidence: [exampleResume.id] }] };
+    expect(ResumeVersionSchema.safeParse(bad).success).toBe(false);
+  });
 });

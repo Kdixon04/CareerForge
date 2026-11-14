@@ -36,6 +36,10 @@ Read `src/contracts/index.ts` first, then the focused files:
 
 `src/data/examples.ts` contains fictional data only. Contracts follow `AGENTS.md` but remain provisional until Keyan confirms database IDs, fact storage, job verification lifecycle, and résumé persistence/source-fact links.
 
+The foundation page lives in `src/app/`, matching the paths in `AGENTS.md`. Coordinate changes to `src/app/globals.css` with Steve, who owns the design system and theme.
+
+Dependency review: Next.js 15.5.29 pins PostCSS 8.4.31, so the lockfile overrides PostCSS to 8.5.33. Zod 3.23.8 still has a high advisory for oversized constrained collections; its schemas are currently exercised only in tests and are not parsing external requests in this foundation. Upgrade and revalidate the contracts before using Zod on untrusted API input. The production audit is not clean.
+
 ## Pull requests and deployment
 
 Open a feature branch from current `main` and a PR into `main`. CI installs from the committed lockfile, checks TypeScript, unit contracts, production build, and a Chromium landing-page smoke at desktop and mobile widths. The smoke test needs a local Chromium installation; CI installs it with required system packages. There is no database check yet. After Keyan publishes migrations and isolated fictional test fixtures, add a separate local Supabase test job that never targets production. Vercel Git integration, if configured, handles preview and production deployments independently of this CI workflow.

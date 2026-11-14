@@ -15,6 +15,17 @@ export const ResumeVersionSchema = z.object({
   editedBullets: z.array(z.object({ id: z.string().uuid(), text: z.string() })),
   match: MatchResultSchema, factSnapshot: z.array(StudentFactSchema),
   createdAt: z.string().datetime(), updatedAt: z.string().datetime(),
+}).superRefine((version, context) => {
+  const factIds = new Set(version.factSnapshot.map(fact => fact.id));
+  version.generatedBullets.forEach((bullet, index) => {
+    if (bullet.evidence.some(id => !factIds.has(id))) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Evidence must reference a saved source fact',
+        path: ['generatedBullets', index, 'evidence'],
+      });
+    }
+  });
 });
 export type MatchResult = z.infer<typeof MatchResultSchema>;
 export type ResumeVersion = z.infer<typeof ResumeVersionSchema>;
