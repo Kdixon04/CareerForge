@@ -90,7 +90,7 @@ export default async function JobsPage() {
                       className="cf-button cf-button--secondary"
                       href={`/jobs/${job.id}`}
                     >
-                      Open job detail
+                      {fixtureMode ? 'Open example job detail' : 'Open job detail'}
                     </a>
                   </p>
                 </article>

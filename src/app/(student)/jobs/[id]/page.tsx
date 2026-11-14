@@ -109,6 +109,11 @@ function KnownJobDetail({
         <p className="cf-jobs-card-note">
           Saving applications and résumé matching will be connected in the next integration steps.
         </p>
+        {fixtureMode && (
+          <a className="cf-button" href={`/match/${job.id}`}>
+            Review résumé suggestions
+          </a>
+        )}
         <a className="cf-button cf-button--secondary" href="/jobs">
           Back to jobs
         </a>
