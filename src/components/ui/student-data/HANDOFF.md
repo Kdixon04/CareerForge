@@ -177,3 +177,57 @@ The new PR is preparation/scaffolding only, includes inherited PR #29 fixture fi
 - `src/components/ui/student-data/testing/verify-contracts.mjs`
 
 Publication: draft PR [#35](https://github.com/Kdixon04/CareerForge/pull/35) targets main. At this documentation checkpoint hosted CI is pending; opening CI run: https://github.com/Kdixon04/CareerForge/actions/runs/43617801983 . Read the PR checks for the latest head before review. No deployment or active security-workflow approval is implied.
+
+## Current follow-up — production boundary preparation (f4a3014)
+
+This section is current; earlier counts/checkpoints below are historical. Safely merged current main fc9efcd into Steve's branch before feature edits (Dallas's job import preparation and bounded request-body work). No independent changes to Dallas/Keyan paths, AGENTS.md, packages/lockfile or active CI. PR #17 head c9ac840 and PR #29 head 317f6dd remain protected/unchanged. PR #35 stays DRAFT; not ready for merge/production sign-off.
+
+**Complete and locally verified:** prepared createVerifiedResolver callback boundary; production test-mode/fictional-header rejection in prepared HTTP handlers; fixed public error reconstruction; shared read/write profile corruption bounds; simultaneous application update/retry conformance; live verification checklist. **Prepared only:** server verifier/ordinary adapter injection and production syntax/origin preflight. These factories are not active Next route exports. **Mocked:** all identity/role/driver acceptance and A/B/reload/concurrency evidence, including tests that deliberately label memory stubs kind=real to exercise boundary acceptance. That label is not real security evidence. **Hosted-CI verified at resume:** old head 9e2fe3b, run 43617849174; new-head CI must be checked after push. **Blocked:** real atomic driver/Auth/RLS/production durability/live A/B/deployment, Keyan/Dallas approvals and environment.
+
+See [INTEGRATION.md](INTEGRATION.md) for exact verifyCaller/connect signatures and environment separation, [LIVE-VERIFICATION.md](LIVE-VERIFICATION.md) for the unexecuted ordinary-user Auth/RLS/rollback/deployment checklist, and [DEPENDENCY-AUDIT.md](DEPENDENCY-AUDIT.md) for the unchanged six inherited findings. PR #28 still supplies SDK client factories, not the missing atomic profile/application driver. Existing sequential main PATCH is preserved and not certified. No changes to production page wiring or test-double fallback.
+
+### Commands and outcomes for this follow-up
+
+On this Windows machine npm commands below were run as node <temporary careerforge-steve-tools/package/bin/npm-cli.js> because npm is not on PATH. The normal smoke server uses the existing ignored npm.cmd shim. Source browser/harness commands use the installed Chromium and ignored toolchain/evidence paths documented above. No machine-specific files are committed.
+
+| Command | Actual outcome |
+|---|---|
+| git status --short / branch --show-current / remote -v / log / rev-parse | Clean dedicated branch at 9e2fe3b at resume; correct Kdixon04/CareerForge remote |
+| git fetch origin; git log HEAD..origin/main; git diff / show | Main advanced to fc9efcd; inspected changes before integration |
+| git merge --no-edit origin/main | PASS, clean merge, no conflict/overwrite/reset/rewrite |
+| GitHub REST read PR #35 description/comments/files, #17/#29/#28 metadata | PASS; #35 draft, no comments at read time, protected heads unchanged, #28 merged |
+| npm ci | PASS, 89 packages installed; inherited six audit findings |
+| npm run typecheck | PASS after fixing new tests' readonly NODE_ENV typing/header union via Vi environment stubs and typed computed headers |
+| npm test | PASS, **123 tests / 22 files**; 13 new Steve checks + 21 tests from merged main above prior 89 |
+| node src/components/ui/student-data/testing/verify-contracts.mjs | PASS, **37 explicit contract/guard tests**, subset of 123, all mocked/stubbed |
+| npm run build | PASS, production build |
+| npm run smoke with CAREERFORGE_E2E_PROFILE_FIXTURE=1 and CAREERFORGE_E2E_JOBS_FIXTURE=1 | PASS, **56 passed / 6 existing intentional fixture skips**, Chromium |
+| node node_modules/@playwright/test/cli.js test --config src/components/ui/student-data/testing/playwright.config.ts | PASS, **9/9**, separate opt-in memory lab, 390/1280 light/dark and errors/isolation/dirty flows |
+| node src/components/ui/examples/preview-check.mjs --profile | PASS, **7/7**, existing profile + simulated callback harness, serial |
+| Manual browser via loopback lab | PASS, fictional profile save/reload; application denied-save public error/focus + retained draft; retry success/reload retains notes only in memory |
+| npm install --prefix node_modules/.cache/steve-security-tools --no-save --no-package-lock secretlint@13.1.0 @secretlint/secretlint-rule-preset-recommend@13.1.0 | PASS, ignored tools only; no project dependency change |
+| node src/components/ui/student-data/testing/scan-secrets.mjs | PASS, source/tests/proposal + production/lab browser bundles |
+| npm audit --omit=dev --audit-level=moderate | PASS, **0 vulnerabilities** |
+| npm audit --audit-level=moderate --json | FAIL, **6 inherited dev findings (3 moderate / 1 high / 2 critical)**; reviewed report without secret values |
+| actionlint 1.7.12 -shellcheck= -pyflakes= .github/workflows/ci.yml src/components/ui/student-data/testing/steve-adapter-contracts.workflow.yml | PASS, workflow syntax/types/expressions; no ShellCheck/Pyflakes claim; proposal NOT activated |
+| rg lab markers in .next/static JavaScript | No matches (production excludes lab identities/markers) |
+| git diff --check / cached --check | PASS before commit |
+
+Focused initial tests were observed failing for corrupt profile reads, mutable public errors and missing resolver behavior, then passed after implementation. No existing assertion, test or documented Chromium skip was weakened/hidden. Tests changing NODE_ENV restore the environment, including inherited CI fixture flags. Full audit is deliberately not marked clean. Actual hosted CI result for the latest head is recorded on PR #35 after it finishes; local results do not imply deployment.
+
+### Files changed in this follow-up (Steve-owned)
+
+- `assignments/steve-rogers.md`
+- `src/app/api/profile/verified-resolver.ts`
+- `src/components/ui/student-data/adapter-contract.ts`
+- `src/components/ui/student-data/AdapterEditors.tsx`
+- `src/components/ui/student-data/DEPENDENCY-AUDIT.md`
+- `src/components/ui/student-data/HANDOFF.md`
+- `src/components/ui/student-data/http-boundary.ts`
+- `src/components/ui/student-data/INTEGRATION.md`
+- `src/components/ui/student-data/LIVE-VERIFICATION.md`
+- `src/components/ui/student-data/readiness.ts`
+- `src/components/ui/student-data/testing/contract-suite.ts`
+- `src/components/ui/student-data/testing/production-guards.test.ts`
+- `src/components/ui/student-data/testing/verified-resolver.test.ts`
+- `src/components/ui/student-data/testing/verify-contracts.mjs`

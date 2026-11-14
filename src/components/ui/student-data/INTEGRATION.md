@@ -53,3 +53,15 @@ Before route adoption: run studentAdapterContract against ordinary fictional cli
 - Upgrade/revalidate the inherited development dependency chain; see DEPENDENCY-AUDIT.md. Do not remove the failing full-audit gate to obtain green results.
 
 No full assignment, production persistence/isolation, live security, A/B experiment or deployment sign-off is given by this handoff.
+
+## Prepared verified resolver — production guards (not activated)
+
+src/app/api/profile/verified-resolver.ts exports createVerifiedResolver({environment?,verifyCaller?,connect?}) for BOTH prepared handler families. It has no Next route export and no Supabase/Auth implementation. Keyan's verifyCaller(Request) must return null for missing/expired identity or {subjectId,role} from supported Auth verification + trusted role storage. connect(verifiedCaller,Request) must return a fresh ordinary-session/RLS StudentDataAdapter whose subject matches that caller; it must never return the memory harness or a privileged service-role client. No identity/adapter is cached across requests.
+
+The factory requires production configuration preflight, rejects browser invocation, fictional session/fault headers, wrong canonical request origins, wrong roles/identities, declared test doubles and mismatched driver subjects. Prepared HTTP factories additionally reject declared doubles/test flags/fictional headers when NODE_ENV=production even if a resolver is injected directly. These guards are consumer preparation, not evidence that any real verifier/driver is approved. A mislabeled driver cannot be detected as genuine by a kind string; owner review plus live ordinary-user tests remain mandatory.
+
+productionConfigurationIssues(environment) is a pure syntax/configuration preflight returning variable NAMES only: NODE_ENV must be production, APP_URL and Supabase URL must be bare HTTPS origins, key must have publishable format, and all four test flags must be unset: STEVE_ADAPTER_LAB, STEVE_LIVE_CONTRACTS, CAREERFORGE_E2E_PROFILE_FIXTURE, CAREERFORGE_E2E_JOBS_FIXTURE. Even nonempty '0'/'false' is rejected to avoid ambiguous production settings. It makes no DNS/Auth/hosting/credential-validity call and is not a deployment probe. Dallas must approve environment/origin handling before activation. Test-runner live flags belong in a separate process, never deployed runtime configuration.
+
+publicAdapterError reconstructs fixed public messages/status from recognized codes and rejects unknown codes. HTTP/UI no longer trust mutable adapter Error.message/status. Read and write profile schemas now share unique-fact and combined-length constraints; corrupted responses cannot render duplicate fact identities or oversized aggregate facts. Contract coverage includes simultaneous application updates with exactly one winner, stale retry and unchanged other-user state.
+
+Before any real route adoption use [LIVE-VERIFICATION.md](LIVE-VERIFICATION.md), whose items are all NOT RUN until evidence is recorded. Existing active main PATCH remains unchanged and non-atomic; the new resolver does not certify or silently replace it.
