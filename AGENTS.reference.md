@@ -1,6 +1,6 @@
 # Career Forge — shared agent instructions
 
-Read this file completely, then your linked assignment before editing. These documents describe the agreed implementation target; they do not claim the application already exists. Follow current human direction. Resolve security or shared-contract conflicts with the relevant owner; continue independent work while blocked. Record small reversible assumptions in your handoff instead of stopping for every detail.
+Before editing, read this file completely, the current [team handoff](teammates.md), and your owner's file in [assignments/](assignments/). AGENTS.md defines shared rules and file ownership; teammates.md records the current handoff and cross-person dependencies; your owner's assignment defines that person's work. Human instructions take precedence. Recheck teammates.md at the start of each work session and when integrating another person's changes. These documents describe the agreed implementation target; they do not claim the application already exists. Resolve security or shared-contract conflicts with the relevant owner; continue independent work while blocked. Record small reversible assumptions in your handoff instead of stopping for every detail.
 
 ## Mission, scope, and current state
 
@@ -19,13 +19,13 @@ Repository inspected on November 13, 2026: main at a48fcbe36ad65039571a31f671ff6
 | Dallas | [assignments/dallas.md](assignments/dallas.md) | Scaffold, shared contracts, Claude/search/resume, integration, Vercel |
 | Keyan | [assignments/keyan.md](assignments/keyan.md) | Supabase schema/migrations/RLS, database adapters, employer features, security tests |
 | Steve Rogers | [assignments/steve-rogers.md](assignments/steve-rogers.md) | Profile and saved-application UI/API wiring, design system, navigation, light/dark themes |
-| Will | [assignments/will.md](assignments/will.md) | Demo data, script, 60–90 second video, user-flow QA, checkpoint tracking |
+| Will | [assignments/will.md](assignments/will.md) | In-app calendar, internship deadlines/reminders, external calendar export, professional contact follow-ups after data handoff, demo and user-flow QA |
 
 One writer per file at a time. Review ownership is not exclusive implementation ownership: Dallas reviews shared changes while Keyan implements SQL and Steve implements his routes. Owners can delegate a precise path/task to another agent in an isolated checkout after announcing the handoff; record who currently holds it. Do not create overlapping implementations.
 
 | Paths (each path is literal; ** means descendants) | Owner |
 |---|---|
-| AGENTS.md, README.md, src/contracts/**, src/lib/claude/**, src/lib/jobs/** | Dallas |
+| AGENTS.md, teammates.md, assignments/dallas-agent-coordination.md, README.md, src/contracts/**, src/lib/claude/**, src/lib/jobs/** | Dallas |
 | src/app/layout.tsx, src/app/page.tsx, src/app/(auth)/** | Dallas |
 | src/app/(student)/jobs/**, src/app/(student)/match/** | Dallas |
 | src/app/api/jobs/**, src/app/api/resume/** | Dallas |
@@ -39,7 +39,9 @@ One writer per file at a time. Review ownership is not exclusive implementation 
 | tests/e2e/dallas-*.spec.ts, tests/unit/dallas-*.test.ts | Dallas |
 | tests/e2e/keyan-*.spec.ts, tests/unit/keyan-*.test.ts | Keyan |
 | tests/e2e/steve-*.spec.ts, tests/unit/steve-*.test.ts | Steve |
-| demo/** | Will |
+| src/app/(student)/calendar/**, src/lib/calendar/**, src/app/api/calendar/** | Will |
+| src/app/(student)/contacts/**, src/lib/contacts/**, src/app/api/contacts/** (after Keyan/Dallas data handoff) | Will |
+| tests/e2e/will-*.spec.ts, tests/unit/will-*.test.ts, demo/** | Will |
 
 Each person owns updates to their assignment; shared ownership/contract changes go through Dallas. Avoid edits to unclaimed shared paths until an owner is recorded.
 

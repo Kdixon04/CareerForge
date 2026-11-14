@@ -1,6 +1,6 @@
 # CareerForge — team working agreement
 
-- Read your assignment in `assignments/` and [the preserved technical reference](AGENTS.reference.md). This file overrides older decisions in that reference; all other technical contracts/security guidance still apply.
+- Read `teammates.md`, your assignment in `assignments/` and [the preserved technical reference](AGENTS.reference.md). This file overrides older decisions in that reference; all other technical contracts/security guidance still apply.
 - Build CareerForge for students across career fields: turn experience into truthful applications. Employers manage listings and see aggregate views/saves.
 - Confirmed demo: sign in → enter experience → find a real job or paste a description → inspect evidence/gaps → edit/save résumé suggestions → save application/update status → reload with edits retained.
 - Broader scope exists; the demo is the delivery priority. Do not assume additional features are authorized.
@@ -8,13 +8,13 @@
 - Steve chose learning as we go: explain each step and why before implementation; afterward explain what changed and one thing the team should understand to tell a judge. Understanding comes before speed.
 - Design: preserve `CareerForge.webp` artwork/proportions; use its brown, gold/orange, cream and charcoal colors. Both light/dark themes are required. No prototype is currently available.
 - Planned stack: Next.js App Router/TypeScript, Supabase Auth/PostgreSQL/RLS, server-side Claude, Vercel. Dallas owns dependencies/configuration.
-- Current state: inspected main at `ac5de72`; plans, assignments and logo only. No scaffold, manifest, migrations, fixtures or executable tests are present.
-- Run: unavailable until Dallas publishes the scaffold. Follow his README install/env/prerequisites and verified dev script; do not invent working commands.
-- Test: unavailable until scaffold. Required targets: typecheck, lint, build, test:unit, test:security, test:e2e. Explicitly report absent/unrun checks.
-- Next: Steve delivers theme tokens/Button/Input; Dallas publishes scaffold/contracts/fixtures; Keyan publishes adapters; then Steve builds profile/saved applications.
+- Current state: main at `0ac89a1` has the Next.js/React 18 scaffold, provisional contracts, fictional fixtures and foundation checks; auth/data adapters and migrations have not landed.
+- Run: follow README; npm ci, npm run dev (port 3000). Use the committed lockfile. Steve's isolated preview commands are in src/components/ui/HANDOFF.md.
+- Test: npm run typecheck, npm test, npm run build, then npm run smoke. No lint/security script yet. Steve-specific commands/results are in src/components/ui/HANDOFF.md.
+- Next: Steve builds profile UI against shared fixtures and requests adapters; Dallas integrates theme/navigation; Keyan publishes adapters. Pasted jobs precede live discovery per teammates.md.
 - Ownership: Dallas owns root docs, scaffold/config/dependencies/lockfiles, shared contracts, root/auth shell, jobs/resume/Claude and integration. This instruction refresh was requested by Steve; coordinate future shared edits.
 - Steve owns exact paths in `assignments/steve-rogers.md`: profile/saved UI and routes, UI/navigation/theme, styles/brand assets and Steve-specific tests. Dallas integrates theme/navigation into root layout.
-- Keyan owns Supabase/migrations/security, auth/data adapters and employer features; Will owns demo/**. Read their assignments for exact boundaries. One writer per file; request changes outside ownership.
+- Keyan owns Supabase/migrations/security, auth/data adapters and employer features; Will owns calendar/contact screens, libraries/routes/tests and demo/** per his updated assignment. Read assignments for exact boundaries. One writer per file; request changes outside ownership.
 - Use feature/steve; preserve others’ work, leave main alone and open a PR when ready. Never merge into main or force-push shared branches. Never commit passwords, API keys, private data or real environment values.
 - Do the legwork yourself: inspect, run, test, research and fix issues. Product, appearance, behavior and tool decisions belong to the team; batch unresolved questions in one message.
 - Choose small implementation details yourself and report the choices. Build only requested features, and build them well.
