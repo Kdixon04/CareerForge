@@ -1,12 +1,12 @@
 # Dallas — integration, contracts, Claude, and job flow
 
-Read [AGENTS.md](../AGENTS.md) first. It defines the shared contracts, permissions, tests and literal paths. Use this file for task order, not a competing specification.
+Read [AGENTS.md](../AGENTS.md), the current [team handoff](../teammates.md), and this assignment before editing. AGENTS.md defines shared rules and ownership; teammates.md records cross-person dependencies. Use [Dallas agent coordination](dallas-agent-coordination.md) to divide **Dallas's** assignment across Codex, Cursor, and Antigravity. It does not change Keyan's, Steve's, or Will's ownership.
 
 ## Mission and boundaries
 
 Own the runnable foundation, job discovery/import and resume generation/review flow; review and integrate small PRs. Keyan owns database/schema/RLS and adapters, including Supabase work already in progress. Steve owns profile/saved UI and their API wiring. Do not duplicate those implementations.
 
-Owned paths: src/contracts/**, src/lib/claude/**, src/lib/jobs/**, src/app/(auth)/**, src/app/(student)/jobs/**, src/app/(student)/match/**, src/app/api/jobs/**, src/app/api/resume/**, src/app/layout.tsx, src/app/page.tsx, README.md, AGENTS.md, package/lockfile, framework/test/deployment configuration, .github/**, .env.example, .gitignore, tests/e2e/dallas-*.spec.ts, tests/unit/dallas-*.test.ts.
+Owned paths: src/contracts/**, src/lib/claude/**, src/lib/jobs/**, src/app/(auth)/**, src/app/(student)/jobs/**, src/app/(student)/match/**, src/app/api/jobs/**, src/app/api/resume/**, src/app/layout.tsx, src/app/page.tsx, README.md, AGENTS.md, teammates.md, assignments/dallas-agent-coordination.md, package/lockfile, framework/test/deployment configuration, .github/**, .env.example, .gitignore, tests/e2e/dallas-*.spec.ts, tests/unit/dallas-*.test.ts.
 
 Request changes to Keyan's supabase/**, src/lib/supabase/**, src/lib/data/** and employer paths, Steve's UI/profile/application paths, and Will's demo/**. Delegate only a specific task/path in a separate checkout and announce the writer.
 
