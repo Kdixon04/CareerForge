@@ -1,6 +1,6 @@
 # Steve Rogers — student profile, saved applications, and design
 
-Read [AGENTS.md](../AGENTS.md) first. You own the student profile and saved-application experience through the UI and route layer. Keyan owns SQL and supplies user-scoped adapters; Dallas owns scaffold/shared schemas/auth shell and AI/job pages. This avoids making Dallas wire every form.
+Read [AGENTS.md](../AGENTS.md) and the current [team handoff](../teammates.md) before editing. You own the student profile and saved-application experience through the UI and route layer. Keyan owns SQL and supplies user-scoped adapters; Dallas owns scaffold/shared schemas/auth shell and AI/job pages. Report exact cross-person contract or adapter needs to Dallas and the relevant owner in your handoff; do not change another owner's files.
 
 Known skills: English, Spanish, Python, a little Java, Excel; limited database experience; strengths in aesthetics/navigation and team coordination. React/TypeScript experience and availability remain TBD. Pair briefly on your first route; use shared adapters rather than writing migrations.
 
@@ -47,3 +47,13 @@ Report task/files/checks/browser themes+widths/security findings/blockers/next. 
 
 Stretch after both themes/core persistence: Spanish strings if team wants them, small skeleton polish, calendar export UI with explicitly agreed date behavior.
 
+
+Confirmed with Steve: explain as we go; use CareerForge.webp colors. Submission: November 14, 2026, 4 p.m. America/Denver; ready by 3:30 p.m. Profile → job → résumé edits → saved application is the confirmed demo. Broader scope does not authorize extra features. No prototype available. Steve approved the first build plan.
+
+First visual slice on feature/steve: semantic light/dark tokens, accessible Button/Input, ThemeProvider/ThemeToggle, MainNav and an isolated React SSR/hydration preview. See [component handoff](../src/components/ui/HANDOFF.md) for exact props, commands and Dallas's root-shell integration request. The shared Next.js/React 18 scaffold and provisional contracts are now on main.
+
+Profile milestone: merged main at 0ac89a1 and now use its React 18 scaffold, shared StudentProfile/StudentFact schemas and exampleStudent. Actual `/profile` route supports display name/career field and add/edit/remove typed experience with stable fact ids, labels/errors, focus handling and both themes. It is explicitly fictional: Save profile stays disabled until Keyan's verified own-profile adapter is connected; Check profile validates only, and reload resets edits. The local callback boundary has simulated pending/success/error/conflict tests; no real persistence claim.
+
+Next handoff: exact adapter/auth signatures and an agreed concurrency request field, followed by real save/reload and two-user isolation checks. Saved applications remain unbuilt. The inherited dependency audit is not clean; Dallas owns updates. The isolated preview and simulated callbacks do not prove persistence.
+
+Landing palette milestone on feature/steve-shell-colors: completed Dallas's requested globals.css bridge to shared semantic tokens, including card/CTA/focus styling. No layout/page/config/contract changes. Production build/type validation and 18 existing unit/contract checks pass; focused landing browser tests 5/5, full smoke 20 pass / 6 fixture callbacks intentionally skip, and secret scan clean. Phone/desktop light/dark, rendered contrast, keyboard action, system changes and no-JavaScript dark mode verified. Root toggle/navigation/startup script remain Dallas's integration task; profile adapters remain Keyan's blocker. See the component handoff for exact paths, commands and evidence limits.

@@ -1,0 +1,31 @@
+.cf-button, .cf-input { font: inherit; }
+.cf-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  min-height: 44px; padding: .7rem 1.1rem; border-radius: var(--cf-radius);
+  border: 1px solid transparent; background: var(--cf-accent); color: var(--cf-on-accent);
+  font-weight: 700; line-height: 1.4; cursor: pointer; text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.cf-button:hover:not(:disabled) { box-shadow: inset 0 0 0 2px currentColor; }
+.cf-button--secondary { color: var(--cf-text); background: var(--cf-surface); border-color: var(--cf-border); }
+.cf-button:disabled { cursor: not-allowed; opacity: .6; }
+.cf-button:focus-visible, .cf-input:focus-visible, .cf-nav a:focus-visible, .cf-skip:focus {
+  outline: 3px solid var(--cf-focus); outline-offset: 4px;
+}
+.cf-field { display: grid; gap: .5rem; min-width: 0; }
+.cf-label { color: var(--cf-text); font-weight: 650; }
+.cf-input {
+  box-sizing: border-box; width: 100%; min-width: 0; min-height: 48px; padding: .8rem .9rem;
+  border: 1px solid var(--cf-border); border-radius: var(--cf-radius);
+  color: var(--cf-text); background: var(--cf-surface); line-height: 1.5;
+}
+.cf-input::placeholder { color: var(--cf-muted); opacity: 1; }
+.cf-input[aria-invalid="true"] { border: 2px solid var(--cf-danger); }
+.cf-hint, .cf-error { margin: 0; font-size: .875rem; line-height: 1.5; overflow-wrap: anywhere; }
+.cf-hint { color: var(--cf-muted); }
+.cf-error { color: var(--cf-danger); }
+.cf-nav { display: flex; gap: .5rem; flex-wrap: wrap; }
+.cf-nav a { padding: .7rem .85rem; min-height: 44px; box-sizing: border-box; border-radius: .5rem; color: var(--cf-text); text-decoration: none; }
+.cf-nav a[aria-current="page"] { background: var(--cf-subtle); text-decoration: underline; text-underline-offset: .3em; }
+.cf-skip { position: fixed; top: .5rem; left: .5rem; transform: translateY(-200%); z-index: 10; background: var(--cf-surface); color: var(--cf-text); padding: .7rem; }
+.cf-skip:focus { transform: none; }
