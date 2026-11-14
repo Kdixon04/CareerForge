@@ -22,6 +22,8 @@ Dallas owns `src/app/layout.tsx` and `src/app/page.tsx`; Steve owns `src/app/glo
 4. Add a skip link to the landing page's existing `<main>` after giving it `id="main"`; avoid nested landmarks. Replace the landing page's existing nav with `MainNav` in a small client shell using `usePathname()` for `currentPath`. Supply `showEmployer` from a verified role; it is presentation only. Its links are plain anchors and pages need real routes before release.
 5. Keep existing landing content and shared contracts. `Button` defaults to `type="button"`; `Input` and `Textarea` link labels/hints/errors. The copied brand image lives at `/brand/careerforge.webp` and preserves original proportions.
 
+When switching to that root shell, Steve should remove the local provider, duplicate header/toggle and profile-only skip link in `ProfilePreview`, use the root skip target `id="main"`, and update the profile browser test's skip-link expectation. The temporary integration worktree exercised that shape; those edits are deliberately absent from PR #4.
+
 ## Commands and scope of evidence
 
 Use the committed app dependencies for the real Next checks:
