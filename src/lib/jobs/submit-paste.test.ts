@@ -85,7 +85,7 @@ describe('submitPasteJob', () => {
     }
   });
 
-  it('server returns 400 -> returns typed error without crashing', async () => {
+  it('server returns 400 (malformed input) -> returns typed error without crashing', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: false,
       status: 400,
@@ -105,6 +105,24 @@ describe('submitPasteJob', () => {
     if (!result.ok) {
       expect(result.message).toBe('Enter a full https:// URL, or leave it blank.');
       expect(result.errors.sourceUrl).toBe('Enter a full https:// URL, or leave it blank.');
+    }
+  });
+
+  it('server returns 500 (server error) -> returns typed error without crashing', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({
+        error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+      }),
+    });
+
+    const result = await submitPasteJob(validBaseInput, fetchMock as unknown as typeof fetch);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.message).toBe('An unexpected error occurred');
+      expect(result.errors).toEqual({});
     }
   });
 
