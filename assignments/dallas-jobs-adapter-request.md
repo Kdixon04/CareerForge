@@ -1,28 +1,26 @@
-# Dallas (Antigravity) ↔ Keyan Adapter Request
+# Dallas (Antigravity) ↔ Keyan Adapter Request & Enablement Guide
 
 **Date:** 2026-11-14  
+**Target:** Truthful MVP demo & submission by 4:00 PM America/Denver  
 **From:** Dallas / Antigravity (server jobs & résumé routes)  
-**To:** Keyan (Supabase schema, RLS, & database adapters)  
+**To:** Keyan (database schema, RLS, & adapters) & Cursor (student UI integrator)  
 
 ---
 
-## 1. Context & Path Ownership Correction
+## 1. Path Ownership & Boundaries
 
 Per AGENTS.md:
-- `src/lib/jobs/**` is **Dallas-owned**.
-- `src/lib/data/**` and `src/lib/supabase/**` are **Keyan-owned**.
+- `src/lib/data/**` and `src/lib/supabase/**` are **Keyan-owned** (security-sensitive database/RLS layer).
+- `src/lib/jobs/**` and `src/app/api/jobs/**` are **Dallas-owned** (server HTTP handlers and logic).
+- `src/app/(student)/jobs/**` is **Cursor-owned** (student UI).
 
-Keyan's PR #32 previously added `listPublishedJobs()` and `getPublishedJob(id)` in `src/lib/jobs/job-adapter.ts`. Dallas notes that `src/lib/jobs/**` is a Dallas path, while Keyan's adapters belong in `src/lib/data/**`.
-
-For the private pasted-job import and read workflow required for the MVP student journey, we request Keyan to publish the user-scoped database adapters in **`src/lib/data/jobs.ts`** (or `src/lib/data/**`). Antigravity does **not** edit Keyan's paths, will **not** implement Keyan's database adapters, and will **not** create fake in-memory persistence.
-
-Cursor's PR #27 has prepared the UI client boundary (`src/app/(student)/jobs/job-api-client.ts`) with `IS_JOB_PERSISTENCE_AVAILABLE = false`, waiting for verified server routes. Antigravity has prepared the route-level logic and test specifications in `src/lib/jobs/private-job-handlers.ts`, waiting for Keyan's real adapters.
+Keyan's database adapters must reside in **`src/lib/data/jobs.ts`** (or `src/lib/data/**`). Dallas/Antigravity does **not** edit Keyan's paths, will **not** implement Keyan's database adapters, and will **not** create fake in-memory persistence. Everything stays fail-closed and truthful.
 
 ---
 
 ## 2. Requested Adapter Signatures & Contracts
 
-Keyan to export the following two user-scoped functions from **`src/lib/data/jobs.ts`**:
+Keyan to create and export the following user-scoped functions in **`src/lib/data/jobs.ts`**:
 
 ### A. `createPrivateJobImport`
 
@@ -68,27 +66,98 @@ export async function createPrivateJobImport(draft: JobDraft): Promise<JobPostin
  *     - Students can read paused jobs they previously saved.
  * - Returns `JobPosting` if found and accessible.
  * - Returns `null` if the job does not exist OR is a private job belonging to another user.
- *   (Crucial: never expose the existence of foreign private jobs; must return null so route returns 404).
+ *   (Crucial: never expose the existence of foreign private jobs; returns null so route returns 404).
  */
 export async function getAuthorizedJob(id: string): Promise<JobPosting | null>;
 ```
 
 ---
 
-## 3. Database & RLS Status (Verified)
+## 3. Database & RLS Status (Verified on `main`)
 
-Keyan's applied migration `supabase/migrations/20261113200000_career_forge_initial.sql` already provides the necessary RLS policies:
-1. `jobs_insert_own`: Allows insert when `created_by_user_id = auth.uid()` and `source <> 'employer' and employer_id is null and status = 'private'`.
-2. `jobs_select_authorized`: Allows select when `created_by_user_id = auth.uid()` OR `(status = 'published' and source = 'employer')` OR user saved the paused listing.
+Keyan's applied migration `supabase/migrations/20261113200000_career_forge_initial.sql` already provides the necessary RLS policies on the `jobs` table:
+1. `jobs_insert_own`:
+   ```sql
+   create policy jobs_insert_own on public.jobs for insert to authenticated
+     with check (
+       created_by_user_id = auth.uid()
+       and (
+         (source = 'employer' and public.has_role('employer') and public.is_employer_owner(employer_id))
+         or (source <> 'employer' and employer_id is null and status = 'private')
+       )
+     );
+   ```
+2. `jobs_select_authorized`:
+   ```sql
+   create policy jobs_select_authorized on public.jobs for select to authenticated
+     using (
+       created_by_user_id = auth.uid()
+       or (status = 'published' and source = 'employer')
+       or (status = 'paused' and exists (
+         select 1 from public.saved_applications sa
+         where sa.job_id = jobs.id and sa.user_id = auth.uid()
+       ))
+       or (public.has_role('admin') and source = 'employer')
+     );
+   ```
 
-The migration and RLS are already in place; only the TypeScript adapter functions in `src/lib/data/jobs.ts` are needed.
+The database tables and RLS policies are applied and verified. Only the TypeScript adapter functions in `src/lib/data/jobs.ts` are needed.
 
 ---
 
-## 4. Antigravity Server Route Plan (Dallas Paths)
+## 4. Current State: Inert & Fail-Closed Routes
 
-Once Keyan provides `src/lib/data/jobs.ts`, Antigravity will connect:
-- `POST /api/jobs/import` -> reads bounded body via `readBoundedBody()`, validates `JobDraftSchema`, verifies session, calls `createPrivateJobImport(draft)`, returns `{ data: JobPosting }`.
-- `GET /api/jobs/[id]` -> validates UUID, verifies session, calls `getAuthorizedJob(id)`, returns `{ data: JobPosting }` or `{ error: { code: 'NOT_FOUND', message: 'Job not found' } }` (404).
+Antigravity has prepared the route handlers in:
+- `src/app/api/jobs/import/route.ts`
+- `src/app/api/jobs/[id]/route.ts`
+- Backing logic in `src/lib/jobs/private-job-handlers.ts`
 
-Until Keyan's adapters land, live routes are not exposed to pretend data is saved, and integration remains explicitly blocked.
+**While Keyan's adapter in `src/lib/data/jobs.ts` is absent:**
+- Both routes run in fail-closed mode and return `503 SERVICE_UNAVAILABLE` ("Job persistence adapter is not available. Waiting for Keyan data adapter.").
+- No fake in-memory persistence exists.
+- No false claims of database persistence are made.
+
+---
+
+## 5. One-Line Enablement Steps
+
+Once Keyan lands `src/lib/data/jobs.ts`:
+
+### Step 1: Antigravity Routes (One-Line Enablement)
+- In `src/app/api/jobs/import/route.ts`:
+  ```ts
+  import { createPrivateJobImport } from '../../../../lib/data/jobs';
+  // Change return line to:
+  return handleImportJob(request, { adapter: { createPrivateJobImport } });
+  ```
+- In `src/app/api/jobs/[id]/route.ts`:
+  ```ts
+  import { getAuthorizedJob } from '../../../../lib/data/jobs';
+  // Change return line to:
+  return handleGetJob(id, { adapter: { getAuthorizedJob } });
+  ```
+
+### Step 2: Cursor UI Flag Flip (One-Line Enablement)
+- In `src/app/(student)/jobs/job-api-client.ts`:
+  ```ts
+  export const IS_JOB_PERSISTENCE_AVAILABLE = true;
+  ```
+
+### Step 3: Run Guarded Real DB Isolation Test
+- Enable and run `tests/e2e/dallas-private-jobs-db.spec.ts` with live Supabase test credentials (`E2E_STUDENT_A_*`, `E2E_STUDENT_B_*`).
+
+---
+
+## 6. Documented Demo Fallback / Cut (4:00 PM Submission Guardrail)
+
+If Keyan's `src/lib/data/jobs.ts` adapter does not land in time for the 4:00 PM America/Denver deadline:
+1. **Fallback Mode Confirmed:**
+   - Real database persistence is proven on **Profile** (`GET/PATCH /api/profile`) and **Published Jobs Browse/Detail** (`listPublishedJobs` / `getPublishedJob`).
+   - Pasted jobs remain in their clearly labeled **Preview Mode**:
+     - Badge: `Preview — not saved` / `● Unverified`.
+     - Button: `Save as private job (not connected)` remains disabled.
+     - Notice: `Parse preview only — not saved`.
+   - The demo truthfully presents the pasted-job parse as an ephemeral preview, exactly as built.
+2. **Strict Rule:**
+   - Never fake persistence with in-memory stores or mock sessions.
+   - The app remains completely honest and transparent about what persists and what is preview.
