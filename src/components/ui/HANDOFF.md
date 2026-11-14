@@ -1,24 +1,30 @@
-# Steve visual system handoff
+# Steve design and profile handoff
 
-## Status
+## State and boundaries
 
-The current CareerForge main has a Next.js 15 App Router scaffold using React 18, shared [contracts](../../contracts/) and [fictional examples](../../data/examples.ts). This slice adds theme, navigation, Button/Input, CSS tokens, and a separate component fixture. It does not add profile or saved-application routes, auth, persistence, or résumé behavior. The preview's form and `/saved` state use fictional in-memory data only.
+CareerForge main has the Next.js 15/React 18 scaffold, provisional [contracts](../../contracts/) and [fictional examples](../../data/examples.ts). This branch adds light/dark theme components, navigation, Button/Input/Textarea and a real `/profile` route backed by fictional data. Its form supports editable facts and validation; **Save profile is disabled** until Keyan supplies a verified, user-scoped adapter. Reload discards edits. There is no real auth, saved-application route, persistence or AI flow here. The port-4317 component harness is a separate fixture; its `/saved` page is only an empty-state example.
 
-## Dallas integration request
+Current main's `AGENTS.md` is the shared rule source. This branch removes the displaced `AGENTS.reference.md` and keeps Steve's assigned component/profile work.
 
-Dallas owns `src/app/layout.tsx` and `src/app/page.tsx`; please wire this slice there in a separate integration change:
+## Profile and data handoff
 
-1. Import `src/styles/tokens.css` and `src/styles/components.css` once from the root layout, alongside existing `globals.css`. In `globals.css`, map the existing `body` background/text to `var(--cf-bg)` and `var(--cf-text)` so dark mode changes the actual page. Do not import `examples/preview.css` into the product.
-2. Wrap the app body in `ThemeProvider` from `src/components/theme/ThemeProvider.tsx`. Add `ThemeToggle` inside that provider. `useTheme()` returns `{ theme: 'light' | 'dark' | null, setTheme }`; null is pre-hydration. Only the `careerforge-theme` preference is kept in localStorage.
-3. Apply the static `THEME_INIT_SCRIPT` from `src/components/theme/theme.ts` in the document head before first paint. The script changes the HTML theme attributes; scope `suppressHydrationWarning` to `<html>` if needed, and include a CSP nonce if the deployed policy requires one.
-4. Add an app-owned skip link targeting the landing page's existing `<main>` after giving it `id="main"`; avoid nesting another `<main>`. Replace the landing page's current nav with `MainNav({ currentPath, showEmployer? })` from `src/components/nav/MainNav.tsx` in a client shell using `usePathname()`. Supply `showEmployer` from a verified role; that flag controls presentation only. The anchors do full navigations. Routes such as `/saved` need their real implementation before those links become usable in the product.
-5. Keep the existing landing content and shared contracts. `Button` uses native button attributes plus `variant` and `loading`; `Input` requires `label` and links optional hint/error text. The brand asset is `/brand/careerforge.webp` at its original proportions.
+`ProfileForm({ initialProfile: StudentProfile, onSave?: (draft: ProfileDraft, expectedUpdatedAt: string) => Promise<StudentProfile> })` is in `src/app/(student)/profile/ProfileForm.tsx`. `ProfileDraft` selects editable fields from the shared StudentProfile; it is a local UI boundary, not an agreed API schema. Without `onSave`, the form offers Check profile and leaves Save disabled. With `onSave`, it handles pending, success, error and conflict states and passes the returned `updatedAt` to the next save. The simulated callback tests do not establish server authorization or persistence.
 
-The temporary Next integration check tests this wiring in a separate worktree; it is not part of this PR. Dallas should include it in an integration PR after accepting the component slice. Coordinate profile/application adapter signatures and confirmed contract fields with Keyan before implementing persistence.
+Keyan and Dallas: confirm the verified own-profile adapter paths/signatures, atomic save and concurrency request field/header, fact ownership checks, application list/save/update/unsave adapters and hidden/paused job summaries. Replace `ProfilePreview`'s fictional loader and local ThemeProvider only when real auth/data and the root shell exist. Do not silently use the fictional profile for a signed-in student. Frontend bounds (name 120, field 160, organization 200, dates 100, 100 facts / 30,000 fact characters) need corresponding server confirmation. Zod 3.23.8 remains under advisory; Dallas must upgrade/revalidate before parsing external API requests.
 
-## Checks
+## Dallas root shell integration
 
-From the repository root, install the committed app dependencies and run:
+Dallas owns `src/app/layout.tsx` and `src/app/page.tsx`; Steve owns `src/app/globals.css`. A temporary main-based Next worktree verified the following wiring with committed React/Next dependencies; it is **not** part of this PR:
+
+1. Import `src/styles/tokens.css` and `src/styles/components.css` once in root layout. Ask Steve to map the current `body` background/text in his `globals.css` to `var(--cf-bg)` / `var(--cf-text)` so both themes affect the actual page. Never import `examples/preview.css` into the product.
+2. Wrap the shell once in `ThemeProvider` from `src/components/theme/ThemeProvider.tsx`. Put `ThemeToggle` inside it. Only the `careerforge-theme` preference is stored locally; `aria-pressed` conveys the current theme.
+3. Put static `THEME_INIT_SCRIPT` from `src/components/theme/theme.ts` in the document head before first paint. Supply a CSP nonce if needed; scope `suppressHydrationWarning` to `<html>` only if the intentional theme attribute change requires it.
+4. Add a skip link to the landing page's existing `<main>` after giving it `id="main"`; avoid nested landmarks. Replace the landing page's existing nav with `MainNav` in a small client shell using `usePathname()` for `currentPath`. Supply `showEmployer` from a verified role; it is presentation only. Its links are plain anchors and pages need real routes before release.
+5. Keep existing landing content and shared contracts. `Button` defaults to `type="button"`; `Input` and `Textarea` link labels/hints/errors. The copied brand image lives at `/brand/careerforge.webp` and preserves original proportions.
+
+## Commands and scope of evidence
+
+Use the committed app dependencies for the real Next checks:
 
 ```powershell
 npm ci
@@ -29,19 +35,19 @@ npx playwright install chromium
 npm run smoke
 ```
 
-`npm run smoke` uses the root Playwright config, starts the built Next app on port 3000, and tests only the landing page at desktop/mobile widths. It does not run Steve's port-4317 preview suite.
+Normal smoke starts Next on port 3000. It collects the landing and integrated `/profile` checks; it does not attempt the port-4317 fixture. The design preview spec and Node design tests live under `src/components/ui/examples/`, outside normal Playwright discovery. Profile callback cases in `tests/e2e/steve-profile.spec.ts` skip during normal smoke and run only in the separate preview command.
 
-The component fixture has a separate toolchain solely for `esbuild`; install matching committed React, React DOM, Playwright and TypeScript versions there. This does not change `package.json` or the lockfile:
+The component fixture needs esbuild in a disposable toolchain. Install the same React/React DOM/Playwright/TypeScript versions as the app; no manifest or lockfile change is needed:
 
 ```powershell
 $env:STEVE_TOOLCHAIN = Join-Path $env:TEMP 'careerforge-steve-tools'
 npm install --prefix $env:STEVE_TOOLCHAIN --no-save --no-audit --no-fund esbuild@0.25 react@18.3.1 react-dom@18.3.1 @types/react@18.3.3 @types/react-dom@18.3.0 @types/node@22.7.4 typescript@5.6.2 @playwright/test@1.65.1
 $env:STEVE_SCREENSHOTS = Join-Path $env:TEMP 'careerforge-steve-screenshots'
 node src/components/ui/examples/check.mjs
+node src/components/ui/examples/check.mjs tests/unit/steve-profile.test.ts
 node src/components/ui/examples/typecheck.mjs
 node src/components/ui/examples/preview-check.mjs
+node src/components/ui/examples/preview-check.mjs --profile
 ```
 
-The last command starts and stops the preview server itself. `browser-check.mjs` creates a Playwright config in the temporary toolchain and runs `steve-design.spec.ts` against port 4317. Set `STEVE_BROWSER` to a Chromium executable if the default Windows Edge path is unavailable. Screenshots, traces and bundles stay outside Git. These fixture checks prove only component behavior, not Next integration or saved data.
-
-Report exact pass/fail results for the current commit. Do not treat the isolated preview as proof of production routes, auth, data security or persistence.
+`preview-check.mjs` starts/stops the port-4317 fixture itself; `--profile` also starts/stops the built Next app on port 3000 for the integrated profile and simulated callback cases. `browser-check.mjs` writes its own Playwright config to the temporary toolchain. Set `STEVE_BROWSER` to a Chromium executable if Edge is unavailable. Bundles, screenshots and traces stay outside Git. Fixture checks prove component behavior, not database saves. Report each current command/result separately; no auth, RLS, persistence, live AI or deployment check is claimed.

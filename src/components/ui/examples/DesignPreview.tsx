@@ -6,8 +6,9 @@ import { Input } from '../Input';
 import { MainNav } from '../../nav/MainNav';
 import { ThemeProvider } from '../../theme/ThemeProvider';
 import { ThemeToggle } from '../../theme/ThemeToggle';
+import { ProfileTestFixture } from './ProfileTestFixture';
 
-export function DesignPreview({ currentPath = '/profile' }: { currentPath?: string }) {
+export function DesignPreview({ currentPath = '/profile', scenario }: { currentPath?: string; scenario?: string }) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
   const [accepted, setAccepted] = useState(false);
@@ -19,6 +20,7 @@ export function DesignPreview({ currentPath = '/profile' }: { currentPath?: stri
     setAccepted(valid);
     if (!valid) formRef.current?.querySelector('input')?.focus();
   }
+  if (currentPath === '/profile-form') return <ProfileTestFixture scenario={scenario} />;
   return <ThemeProvider>
     <a className="cf-skip" href="#main">Skip to content</a>
     <div className="preview-shell">
