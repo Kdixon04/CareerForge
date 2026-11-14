@@ -10,7 +10,23 @@ Main has a Next.js landing page, provisional [contracts](src/contracts/), [ficti
 
 **Ownership exception:** Steve unavailable 2026-11-14; Dallas patched MainNav, root-shell wiring, and steve-shell.spec.ts rebase. The AGENTS.md ownership table still stands for all future work.
 
-**Integration status — 2026-11-14 (interim, Cursor as integrator while Codex is out of tokens until ~2:00pm Denver):** `main` at `60d23d6`. Merged today: auth #30, Supabase client #28, profile adapter #31, published-jobs adapter #32, parse body-bound #33, resume-suggest helper #34/#39, saved preview #29/#37, theme #17/#36, copy bullets #38, calendar #41 (auto-merged #7), published-jobs filters #42, private-job handler logic #40 (fail-closed). Local main green: typecheck, unit 138/138, build, Dallas Playwright 36/36 (390/1280, light+dark, fixture mode). **Open:** #35 (Steve adapter prep — DRAFT, not integrated). **Deployed smoke: NOT RUN** — no Vercel project / GitHub deployment configured and no local Supabase credentials; do not invent them. **Private pasted-import persistence** stays disabled/fail-closed until Keyan's `src/lib/data/jobs.ts` + Antigravity's route wiring land and are verified with real Student A/B sessions; if that does not land by the deadline it is a documented cut. Will's Windows Playwright `webServer` hang was root-caused with a proposed `playwright.config.ts` fix flagged for Codex (see [handoff](assignments/dallas-cursor-antigravity-handoff.md)); Cursor did not edit that config.
+**Integration status — 2026-11-14 (~12:00 Denver, waiting on Keyan + deploy):** `main` at `c35702c`. Includes inert `POST /api/jobs/import` + `GET /api/jobs/[id]` (#44), filters #42, calendar #41, fail-closed handlers #40. **Open:** #35 (DRAFT), #45 (stretch prep hub UI — fixture, not merged). **No Antigravity prep/résumé routes PR on GitHub yet** (integrate when CI-green + fail-closed). **Deployed smoke: NOT RUN** — Vercel + Supabase env pending Keyan. **Prep for Keyan:** [keyan-ask.md](assignments/keyan-ask.md), [core-at-12-runbook.md](assignments/core-at-12-runbook.md).
+
+**Proposed scope for 4pm (confirm with human/Keyan):** saved-application **persistence CUT** → labeled fixture on `/saved` (Steve unavailable); **employer journey CUT**; Keyan prioritizes `src/lib/data/jobs.ts` + résumé adapters, then deploy env. Private import + résumé reload are **stretch-to-core** if adapters land in time.
+
+**Verified demo journey reference (for Will's video — do not claim persistence where marked fixture):**
+
+| Step | Route | Expected truth label |
+|------|--------|----------------------|
+| Sign in | `/sign-in` | Real when Supabase env set |
+| Profile save/reload | `/profile` | **Real** when adapter + env (target) |
+| Browse + filters | `/jobs` | **Real** published rows when DB seeded; CI uses fixture env |
+| Job detail | `/jobs/[id]` | **Real** or fixture per env |
+| Paste preview | `/jobs` form | **Real** parse; save private **off** until flag flip |
+| Match / résumé edit | `/match/[id]` | **Fixture** until résumé routes + adapter |
+| Saved applications | `/saved` | **Fixture** (proposed cut) |
+| Calendar | `/calendar` | **Fixture** sample schedule |
+| Prep hub | `/jobs/[id]/prep` | **Fixture** (PR #45, `IS_PREP_LIVE` false) |
 
 ## Owners and next handoffs
 

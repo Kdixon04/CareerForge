@@ -1,6 +1,8 @@
 # Cursor ↔ Antigravity / Dallas handoff
 
-**Updated:** 2026-11-14 (interim: Cursor acting as integrator while Codex is out of tokens until ~2:00pm Denver) · **main** at `60d23d6` (auth, profile adapter #31, published jobs adapter #32, calendar #41, filters #42, private-job handler logic #40).
+**Updated:** 2026-11-14 (~12:00 Denver, Keyan + deploy pending) · **main** at `c35702c` (inert import/read routes #44, filters #42, handlers #40).
+
+**Keyan arrival:** read [keyan-ask.md](keyan-ask.md) and execute [core-at-12-runbook.md](core-at-12-runbook.md) after adapters land. **Scope (proposed):** applications persistence CUT (fixture `/saved`); employer CUT; stretch prep #45 remains optional. **Prep ownership:** [stretch-prep-hub.md](stretch-prep-hub.md) (on PR #45) — Cursor owns contacts UI; Antigravity must not ship real outreach or duplicate contacts API.
 
 Cursor owns `src/app/(student)/jobs/**` and `match/**`. Cursor does **not** edit `src/app/api/**`, `src/lib/jobs/**` (except consuming types), `src/lib/supabase/**`, or contracts.
 
