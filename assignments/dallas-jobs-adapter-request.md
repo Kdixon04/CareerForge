@@ -1,32 +1,38 @@
 # Dallas (Antigravity) ↔ Keyan Adapter Request
 
-**Date:** 2026-11-14
-**From:** Dallas / Antigravity (server jobs & résumé routes)
-**To:** Keyan (Supabase schema, RLS, & database adapters)
+**Date:** 2026-11-14  
+**From:** Dallas / Antigravity (server jobs & résumé routes)  
+**To:** Keyan (Supabase schema, RLS, & database adapters)  
 
 ---
 
-## 1. Context & Motivation
+## 1. Context & Path Ownership Correction
 
-On `main`, Keyan's PR #32 landed `listPublishedJobs()` and `getPublishedJob(id)` in `src/lib/jobs/job-adapter.ts`.
-However, the private pasted-job workflow required for MVP student application tracking is still missing its database adapters:
-1. `createPrivateJobImport(draft: JobDraft)`
-2. `getAuthorizedJob(id: string)`
+Per AGENTS.md:
+- `src/lib/jobs/**` is **Dallas-owned**.
+- `src/lib/data/**` and `src/lib/supabase/**` are **Keyan-owned**.
 
-Per AGENTS.md and team rules, Antigravity does **not** edit Keyan's files (`src/lib/data/**` or `supabase/**`) and will not create fake in-memory persistence. Cursor's PR #27 has already prepared the UI client boundary (`job-api-client.ts`) and is waiting for Antigravity's real server routes (`POST /api/jobs/import` and `GET /api/jobs/[id]`).
+Keyan's PR #32 previously added `listPublishedJobs()` and `getPublishedJob(id)` in `src/lib/jobs/job-adapter.ts`. Dallas notes that `src/lib/jobs/**` is a Dallas path, while Keyan's adapters belong in `src/lib/data/**`.
+
+For the private pasted-job import and read workflow required for the MVP student journey, we request Keyan to publish the user-scoped database adapters in **`src/lib/data/jobs.ts`** (or `src/lib/data/**`). Antigravity does **not** edit Keyan's paths, will **not** implement Keyan's database adapters, and will **not** create fake in-memory persistence.
+
+Cursor's PR #27 has prepared the UI client boundary (`src/app/(student)/jobs/job-api-client.ts`) with `IS_JOB_PERSISTENCE_AVAILABLE = false`, waiting for verified server routes. Antigravity has prepared the route-level logic and test specifications in `src/lib/jobs/private-job-handlers.ts`, waiting for Keyan's real adapters.
 
 ---
 
 ## 2. Requested Adapter Signatures & Contracts
 
-We request Keyan to publish the following two functions in `src/lib/jobs/job-adapter.ts` (or `src/lib/data/jobs.ts`):
+Keyan to export the following two user-scoped functions from **`src/lib/data/jobs.ts`**:
 
 ### A. `createPrivateJobImport`
+
 ```ts
 import type { JobDraft, JobPosting } from '../../contracts';
 
 /**
  * Inserts a private pasted job for the authenticated caller.
+ *
+ * Location: src/lib/data/jobs.ts (Keyan-owned)
  *
  * Requirements:
  * - Uses `createSupabaseServerClient()` to enforce RLS (`jobs_insert_own`).
@@ -35,7 +41,7 @@ import type { JobDraft, JobPosting } from '../../contracts';
  *     - `id`: database-generated UUID (`gen_random_uuid()`)
  *     - `source`: 'pasted'
  *     - `status`: 'private'
- *     - `created_by_user_id`: caller's `user.id`
+ *     - `created_by_user_id`: caller's `user.id` (auth.uid())
  *     - `employer_id`: null
  *     - `provider_name`: null
  *     - `external_id`: null
@@ -47,9 +53,12 @@ export async function createPrivateJobImport(draft: JobDraft): Promise<JobPostin
 ```
 
 ### B. `getAuthorizedJob`
+
 ```ts
 /**
  * Retrieves a job posting if the authenticated caller is authorized to view it.
+ *
+ * Location: src/lib/data/jobs.ts (Keyan-owned)
  *
  * Requirements:
  * - Uses `createSupabaseServerClient()` to enforce RLS (`jobs_select_authorized`).
@@ -59,42 +68,27 @@ export async function createPrivateJobImport(draft: JobDraft): Promise<JobPostin
  *     - Students can read paused jobs they previously saved.
  * - Returns `JobPosting` if found and accessible.
  * - Returns `null` if the job does not exist OR is a private job belonging to another user.
- *   (Crucial: never expose the existence of foreign private jobs).
+ *   (Crucial: never expose the existence of foreign private jobs; must return null so route returns 404).
  */
 export async function getAuthorizedJob(id: string): Promise<JobPosting | null>;
 ```
 
 ---
 
-## 3. Server Route Implementation Plan (Antigravity Slice)
+## 3. Database & RLS Status (Verified)
 
-Once Keyan publishes the two functions above, Antigravity will immediately implement and land:
+Keyan's applied migration `supabase/migrations/20261113200000_career_forge_initial.sql` already provides the necessary RLS policies:
+1. `jobs_insert_own`: Allows insert when `created_by_user_id = auth.uid()` and `source <> 'employer' and employer_id is null and status = 'private'`.
+2. `jobs_select_authorized`: Allows select when `created_by_user_id = auth.uid()` OR `(status = 'published' and source = 'employer')` OR user saved the paused listing.
 
-### Route 1: `POST /api/jobs/import`
-1. Authenticate caller with `createSupabaseServerClient().auth.getUser()`. If null, return `401 UNAUTHENTICATED`.
-2. Validate raw request body with `readBoundedBody` and `JobDraftSchema`. If invalid, return `400 INVALID_INPUT`.
-3. Call Keyan's `createPrivateJobImport(draft)`.
-4. Return `200` with `{ data: JobPosting }`.
-
-### Route 2: `GET /api/jobs/[id]`
-1. Authenticate caller with `createSupabaseServerClient().auth.getUser()`. If null, return `401 UNAUTHENTICATED`.
-2. Validate `id` is a UUID. If not, return `404 NOT_FOUND`.
-3. Call Keyan's `getAuthorizedJob(id)`.
-4. If null, return `404 NOT_FOUND` (`{ error: { code: 'NOT_FOUND', message: 'Job not found' } }`).
-5. If found, return `200` with `{ data: JobPosting }`.
+The migration and RLS are already in place; only the TypeScript adapter functions in `src/lib/data/jobs.ts` are needed.
 
 ---
 
-## 4. Testing & Verification Plan
+## 4. Antigravity Server Route Plan (Dallas Paths)
 
-This PR supplies a helper only. Its earlier hand-built authorization examples were removed because they did not call any route or RLS policy. The checks below are pending until the named routes and ordinary-session adapters exist; they have not passed yet.
+Once Keyan provides `src/lib/data/jobs.ts`, Antigravity will connect:
+- `POST /api/jobs/import` -> reads bounded body via `readBoundedBody()`, validates `JobDraftSchema`, verifies session, calls `createPrivateJobImport(draft)`, returns `{ data: JobPosting }`.
+- `GET /api/jobs/[id]` -> validates UUID, verifies session, calls `getAuthorizedJob(id)`, returns `{ data: JobPosting }` or `{ error: { code: 'NOT_FOUND', message: 'Job not found' } }` (404).
 
-1. **Unit & Route Tests (Mocked DB)**:
-   - Signed-out request returns 401.
-   - Valid draft import returns 200 with server-derived owner and private status.
-   - Foreign job read returns 404 (isolation test).
-   - Non-existent job read returns 404.
-2. **Integration / Smoke Tests (Real Test DB)**:
-   - Student A imports a private job -> reads it back -> succeeds.
-   - Student B attempts to read Student A's private job -> receives 404.
-   - Published employer job is readable by both Student A and Student B.
+Until Keyan's adapters land, live routes are not exposed to pretend data is saved, and integration remains explicitly blocked.
