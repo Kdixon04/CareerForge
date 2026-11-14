@@ -49,8 +49,13 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       await page.getByRole('button', { name: 'Check profile' }).click();
       await expect(page.getByRole('status')).toHaveCount(1);
       await page.getByRole('button', { name: 'Remove entry 2', exact: true }).click();
+      // Removal deliberately moves focus on the next animation frame; wait for it
+      // before testing a separate keyboard action on the theme toggle.
+      await expect(page.getByRole('button', { name: '+ Add skill', exact: true })).toBeFocused();
       await expect(skill).toHaveValue('Python and data analysis');
-      await toggle.focus(); await page.keyboard.press('Space');
+      await toggle.focus();
+      await expect(toggle).toBeFocused();
+      await toggle.press('Space');
       const opposite = colorScheme === 'light' ? 'dark' : 'light';
       await expect(page.locator('html')).toHaveAttribute('data-theme', opposite);
       await expect(skill).toHaveValue('Python and data analysis');
