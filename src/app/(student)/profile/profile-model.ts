@@ -2,7 +2,7 @@ import { StudentFactSchema, StudentProfileSchema, type StudentFact, type Student
 
 export type ProfileDraft = Pick<StudentProfile, 'displayName' | 'field' | 'facts'>;
 export type DraftValidation = { success: true; data: ProfileDraft } | { success: false; errors: Record<string, string> };
-export const PROFILE_LIMITS = { name: 120, field: 160, facts: 100, totalFactCharacters: 30000, organization: 200, dates: 100 } as const;
+export const PROFILE_LIMITS = { name: 120, field: 160, facts: 100, factText: 2000, totalFactCharacters: 30000, organization: 200, dates: 100 } as const;
 const EditableProfileSchema = StudentProfileSchema.pick({ displayName: true, field: true, facts: true });
 const nullableText = (text: string | null) => text?.trim() || null;
 
@@ -15,6 +15,7 @@ export function validateProfileDraft(draft: ProfileDraft): DraftValidation {
   let characters = 0;
   const ids = new Set<string>();
   draft.facts.forEach((fact, index) => {
+    if (fact.text.length > PROFILE_LIMITS.factText) errors['facts.' + index + '.text'] = 'Use 2,000 characters or fewer.';
     characters += fact.text.length + (fact.org?.length ?? 0) + (fact.dates?.length ?? 0);
     if (ids.has(fact.id)) errors.facts = 'An experience entry was duplicated. Remove the duplicate and try again.';
     ids.add(fact.id);
@@ -52,5 +53,5 @@ export function removeFact(draft: ProfileDraft, id: string): ProfileDraft {
 }
 
 export class ProfileSaveError extends Error {
-  constructor(public readonly code: 'conflict' | 'unavailable') { super(code); }
+  constructor(public readonly code: 'conflict' | 'unavailable' | 'unauthenticated' | 'forbidden' | 'validation' | 'network') { super(code); }
 }

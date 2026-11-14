@@ -1,0 +1,2 @@
+import { defineConfig } from '@playwright/test';
+export default defineConfig({testDir:'.',testMatch:'browser.lab.ts',workers:1,outputDir:'../../../../../test-results/adapter-lab-browser',use:{baseURL:'http://127.0.0.1:4318',browserName:'chromium',trace:'retain-on-failure'},webServer:{cwd:process.cwd(),command:'node src/components/ui/student-data/testing/serve-lab.mjs',url:'http://127.0.0.1:4318/health',env:{STEVE_ADAPTER_LAB:'test-double',NODE_ENV:'development'},reuseExistingServer:false}});

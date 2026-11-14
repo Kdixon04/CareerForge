@@ -1,0 +1,39 @@
+# PROPOSAL ONLY. Dallas owns .github/workflows; copy only after owner review.
+name: Student adapter contract and security checks
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  adapter-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CAREERFORGE_E2E_PROFILE_FIXTURE: '1'
+      CAREERFORGE_E2E_JOBS_FIXTURE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: node src/components/ui/student-data/testing/verify-contracts.mjs
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run smoke
+      - name: Explicitly mocked HTTP/UI adapter lab
+        run: node node_modules/@playwright/test/cli.js test --config src/components/ui/student-data/testing/playwright.config.ts
+      - name: Production dependency security gate
+        run: npm audit --omit=dev --audit-level=moderate
+      - name: Full dependency security gate (known development findings must be fixed)
+        run: npm audit --audit-level=moderate
+      - name: Install pinned scanner without changing project dependencies
+        if: always()
+        run: npm install --prefix node_modules/.cache/steve-security-tools --no-save --no-package-lock secretlint@13.1.0 @secretlint/secretlint-rule-preset-recommend@13.1.0
+      - name: Scan source and built browser JavaScript
+        if: always()
+        run: node src/components/ui/student-data/testing/scan-secrets.mjs
