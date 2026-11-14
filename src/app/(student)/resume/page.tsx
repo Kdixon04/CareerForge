@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from '../../../lib/supabase/server';
 import '../../../styles/tokens.css';
 import '../../../styles/components.css';
 import '../profile/profile.css';
+import { PrintResumeButton } from './PrintResumeButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +70,8 @@ export default async function ResumePage() {
         Your saved profile facts become the foundation for a resume you can
         improve and tailor to opportunities.
       </p>
+
+      <PrintResumeButton />
 
       <section className="cf-profile-card" aria-label="Resume preview">
         <header>
