@@ -90,9 +90,9 @@ export async function submitPasteJob(
 
       const errors: PasteJobFieldErrors = {};
       const lower = errorMessage.toLowerCase();
-      if (lower.includes('title')) errors.title = errorMessage;
-      else if (lower.includes('company')) errors.company = errorMessage;
-      else if (lower.includes('description')) errors.description = errorMessage;
+      if (lower.includes('title')) errors.title = lower.includes('required') ? 'This field is required.' : errorMessage;
+      else if (lower.includes('company')) errors.company = lower.includes('required') ? 'This field is required.' : errorMessage;
+      else if (lower.includes('description')) errors.description = lower.includes('required') ? 'This field is required.' : errorMessage;
       else if (lower.includes('source url') || lower.includes('url')) errors.sourceUrl = 'Enter a full https:// URL, or leave it blank.';
       else if (lower.includes('deadline')) errors.deadline = 'Use the date format YYYY-MM-DD, or leave it blank.';
 
