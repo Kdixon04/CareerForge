@@ -231,3 +231,13 @@ Focused initial tests were observed failing for corrupt profile reads, mutable p
 - `src/components/ui/student-data/testing/production-guards.test.ts`
 - `src/components/ui/student-data/testing/verified-resolver.test.ts`
 - `src/components/ui/student-data/testing/verify-contracts.mjs`
+
+### Subsequent team integration — main 787f6a5
+
+While this task ran, GitHub records walker2023-glitch merged PR #17 at 2026-11-14T17:05:22Z (merge commit 7bb1601); PR #36 integrated it into main 787f6a5. Steve made no PR #17/#29 mutation/merge/rewrite/force-push. #17's original head remains c9ac840, and #29 remains at 317f6dd. Their earlier open-state notes above describe the initial inspection, not current #17 state.
+
+Safely merged the already-integrated main into this branch at 6ee9d23. One conflict was only in src/components/ui/HANDOFF.md; preserved both Steve's adapter note and Dallas's current integration note. No AGENTS.md or shared config/SQL/dependency change. Retained connected profile save props while using the root theme provider; existing sequential PATCH remains unverified/non-atomic.
+
+Re-ran affected checks after this integration: typecheck/build PASS; unit/integration **124/22 files PASS** (the extra unit is main's server-500 handling); explicit mocked contracts **37 PASS**; standard Chromium **64 PASS / 6 unchanged skips**, including all imported Home/Profile theme-navigation cases at 390x844 and 1280x800 in both themes; adapter lab **9 PASS**. Existing profile harness rerun **7/7 PASS**; final Secretlint/bundle marker scan PASS. Full audit remains the same six inherited development findings and production audit is zero; no dependency changes. Prior install/audits remain applicable to the identical package/lockfile; no dependency tree changed. actionlint validation passes again. No new main failure was observed in these checks.
+
+Additional changed file for this follow-up is src/components/ui/HANDOFF.md (merge resolution preserving both notes). Latest exact counts and hosted-head result belong on PR #35; the completed b6449d9 CI run (43619149276) precedes this main integration and must not be presented as verification of a later head. PR #35 stays draft, with real driver/security/durability/live A/B/deployment blocked as documented.
