@@ -79,8 +79,8 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       expect(await page.locator('.cf-jobs-card-description img').count()).toBe(0);
 
       await expect(
-        page.getByRole('button', { name: 'Save as private job (not connected)' }),
-      ).toBeDisabled();
+  page.getByRole('button', { name: 'Save as private job', exact: true }),
+).toBeEnabled();
       await expect(card.getByText(/Parse preview only — not saved/)).toBeVisible();
       await expect(card.getByText(/not a published job/)).toBeVisible();
       await expect(card.getByRole('link', { name: /Try preview id/ })).toHaveCount(0);
