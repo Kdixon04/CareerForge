@@ -3,9 +3,10 @@ import { StudentProfileSchema, StudentFactSchema } from '../../../contracts';
 
 // Consumer-owned proposal. Keyan/Dallas must approve the production bridge.
 const fact = StudentFactSchema.extend({text:z.string().trim().min(1).max(2000),org:z.string().max(200).nullable(),dates:z.string().max(100).nullable()}).strict();
-export const ProfileSchema = StudentProfileSchema.extend({displayName:z.string().max(120),field:z.string().max(160).nullable(),facts:z.array(fact).max(100)}).strict();
+const facts = z.array(fact).max(100).refine(value=>new Set(value.map(item=>item.id)).size===value.length,'Duplicate fact IDs').refine(value=>value.reduce((n,item)=>n+item.text.length+(item.org?.length??0)+(item.dates?.length??0),0)<=30000,'Profile too long');
+export const ProfileSchema = StudentProfileSchema.extend({displayName:z.string().max(120),field:z.string().max(160).nullable(),facts}).strict();
 export type Profile = z.infer<typeof ProfileSchema>;
-export const ProfileWriteSchema = z.object({displayName:z.string().trim().min(1).max(120),field:z.string().trim().max(160).nullable(),facts:z.array(fact).max(100),expectedUpdatedAt:z.string().datetime()}).strict().refine(value=>new Set(value.facts.map(f=>f.id)).size===value.facts.length,'Duplicate fact IDs').refine(value=>value.facts.reduce((n,f)=>n+f.text.length+(f.org?.length??0)+(f.dates?.length??0),0)<=30000,'Profile too long');
+export const ProfileWriteSchema = z.object({displayName:z.string().trim().min(1).max(120),field:z.string().trim().max(160).nullable(),facts,expectedUpdatedAt:z.string().datetime()}).strict();
 export type ProfileWrite = z.infer<typeof ProfileWriteSchema>;
 export const CalendarDate = z.string().length(10).regex(/^\d{4}-\d{2}-\d{2}$/).refine(value=>{const date=new Date(`${value}T00:00:00Z`);return !value.startsWith('0000')&&Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===value;});
 export const StatusSchema = z.enum(['saved','applied','interviewing','offer','rejected']);
@@ -39,3 +40,9 @@ export function ownApplication(adapter:StudentDataAdapter,value:unknown):Applica
   const parsed=ApplicationSchema.safeParse(value);if(!parsed.success||parsed.data.userId!==adapter.subjectId)throw new AdapterError('INVALID_DATA');return parsed.data;
 }
 export function preparedAdapter():StudentDataAdapter {throw new AdapterError('UNAVAILABLE');} // No production implementation/fallback.
+
+// Never expose mutable Error.message/status values received from a driver.
+export function publicAdapterError(error: unknown): AdapterError {
+  const code=error instanceof AdapterError && Object.hasOwn(ERROR_STATUS,error.code) ? error.code : 'UNAVAILABLE';
+  return new AdapterError(code);
+}

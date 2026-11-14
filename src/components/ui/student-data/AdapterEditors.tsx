@@ -3,8 +3,8 @@ import { useEffect,useRef,useState,type FormEvent } from 'react';
 import { ProfileForm } from '../../../app/(student)/profile/ProfileForm';
 import { ProfileSaveError } from '../../../app/(student)/profile/profile-model';
 import { Button } from '../Button';import { Input } from '../Input';import { Textarea } from '../Textarea';import { Card } from '../Card';
-import { AdapterError,ownProfile,ownApplication,StatusSchema,ApplicationPatchSchema,type StudentDataAdapter,type Profile,type Application } from './adapter-contract';
-function message(error:unknown){return error instanceof AdapterError?error.message:'This service is unavailable. Your edits are still here.';}
+import { AdapterError,publicAdapterError,ownProfile,ownApplication,StatusSchema,ApplicationPatchSchema,type StudentDataAdapter,type Profile,type Application } from './adapter-contract';
+function message(error:unknown){return publicAdapterError(error).message;}
 function useUnsaved(dirty:boolean){useEffect(()=>{if(!dirty)return;const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue='';};addEventListener('beforeunload',warn);return()=>removeEventListener('beforeunload',warn);},[dirty]);}
 export function ProfileAdapterEditor({adapter,onDirtyChange}:{adapter?:StudentDataAdapter;onDirtyChange?:(dirty:boolean)=>void}){
   const [profile,setProfile]=useState<Profile|null>(null),[error,setError]=useState(''),[load,setLoad]=useState(0),[dirty,setDirty]=useState(false),[saving,setSaving]=useState(false);const alert=useRef<HTMLDivElement>(null);useUnsaved(dirty);

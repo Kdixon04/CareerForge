@@ -16,3 +16,22 @@ export function liveContractReadiness(environment:Record<string,string|undefined
 }
 // Configuration alone never enables real writes or substitutes fictional data.
 export function requireRealDriver(value:StudentDataAdapter|undefined):StudentDataAdapter{if(!value||value.kind!=='real')throw new AdapterError('UNAVAILABLE');assertAdapterShape(value);return value;}
+
+// Pure preflight: names only, no credentials returned; not a deployment probe.
+export const PRODUCTION_TEST_FLAGS = ['STEVE_ADAPTER_LAB','STEVE_LIVE_CONTRACTS','CAREERFORGE_E2E_PROFILE_FIXTURE','CAREERFORGE_E2E_JOBS_FIXTURE'] as const;
+export function productionConfigurationIssues(environment:Record<string,string|undefined>):string[]{
+  const issues:string[]=[];
+  if(environment.NODE_ENV!=='production')issues.push('NODE_ENV');
+  for(const flag of PRODUCTION_TEST_FLAGS)if(environment[flag])issues.push(flag);
+  for(const name of ['APP_URL','NEXT_PUBLIC_SUPABASE_URL'] as const){
+    try{const url=new URL(environment[name]??'');if(url.protocol!=='https:'||url.username||url.password||url.search||url.hash||url.pathname!=='/')throw new Error();}
+    catch{issues.push(name);}
+  }
+  if(!/^sb_publishable_[A-Za-z0-9_-]+$/.test(environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY??''))issues.push('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY');
+  return issues;
+}
+export function rejectProductionTestMode(request:Request,adapter:StudentDataAdapter,environment:Record<string,string|undefined>){
+  if(environment.NODE_ENV!=='production')return;
+  if(adapter.kind!=='real'||PRODUCTION_TEST_FLAGS.some(flag=>Boolean(environment[flag])))throw new AdapterError('UNAVAILABLE');
+  if(request.headers.has('x-lab-user')||request.headers.has('x-lab-fault'))throw new AdapterError('FORBIDDEN');
+}
