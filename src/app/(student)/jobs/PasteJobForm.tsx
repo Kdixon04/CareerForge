@@ -84,7 +84,6 @@ export function PasteJobForm() {
     setIsSaving(false);
     if (result.ok) {
       setSavedPosting(result.posting);
-      window.location.assign(`/jobs/${result.posting.id}`);
       return;
     }
     if (result.status === 'not_available') {
