@@ -1,0 +1,67 @@
+Help me set up the Supabase database for Career Forge, our BYU-Idaho hackathon project.
+
+First inspect the existing repository and Supabase configuration. Summarize what already exists and identify conflicts before changing anything. Work only on the database setup in my branch. Do not edit application features, shared TypeScript types, app navigation, package files, or deployment configuration without coordinating with the integration owner. Tell the integration owner what tables, fields, and permissions you propose before locking in a shared contract.
+
+## Product and roles
+
+Career Forge supports:
+- Students/job seekers from different career fields. They enter skills, interests, education, projects, and experience; find jobs; save applications; and review AI resume suggestions.
+- Employers. They create and manage their own job listings and see basic analytics for those listings, such as views and saves.
+- Admins. They have limited platform-management capabilities.
+- Teacher/mentor accounts are future work and out of scope.
+
+## Database goals
+
+Use Supabase PostgreSQL, Supabase Auth, migrations, and Row Level Security (RLS).
+
+Propose a small schema that supports the MVP. Consider these entities, but adjust to fit the existing repository:
+
+- Student profile, associated with the authenticated user.
+- Student experience entries, such as education, projects, jobs, and skills.
+- Employer/company profile.
+- Job listing, supporting both employer-created jobs and imported/search-provider jobs.
+- Saved job/application status, associated with a student and job.
+- Resume suggestion/version associated with a student and a job.
+- Optional listing analytics data for views and saves.
+
+For imported job records, keep the source name, original URL, external ID if available, date retrieved, and any verification status. Do not store copied listings indefinitely unless the source terms allow it. The app should be able to use external job APIs later or skip them without changing the core application/job relationships.
+
+## Required access rules
+
+Design and implement policies so that:
+- A student can read and edit only their own profile, experiences, saved applications, and resume versions.
+- An employer can create, edit, and manage only listings belonging to their employer account.
+- Employers can see analytics only for their own listings.
+- Authenticated students can read published/active listings, but cannot edit employer listings.
+- Draft listings are visible only to their owner and authorized admins.
+- Admin privileges cannot be granted by a user editing their own profile or user-editable metadata. Use a trusted assignment mechanism and document how it works.
+- Teacher/mentor permissions are not implemented yet.
+- Private or privileged keys are never required in browser code.
+
+If user roles are stored in a table or token claims, explain who can assign them and prevent users from changing their own role. Do not rely on a role value supplied by the browser.
+
+## Analytics
+
+Keep employer analytics basic and privacy-conscious:
+- Define exactly what counts as a listing view and a save.
+- Prevent clients from submitting arbitrary analytics totals or changing someone else’s events.
+- Avoid storing unnecessary personal data in analytics.
+- If a view count can be inflated through refreshes, state that it is an approximate demo metric and document any simple deduplication approach.
+
+## Work sequence
+
+1. Inspect the repository, current branch, existing migrations, and available Supabase setup.
+2. Propose the minimal schema and RLS rules. Call out decisions that need team agreement.
+3. Implement reversible SQL migration files in the repository. Do not run destructive production changes.
+4. Add seed data only if it is clearly fictional and safe for a demo.
+5. Add or document meaningful permission checks, including tests or a repeatable manual procedure for:
+   - two students being unable to access each other’s records;
+   - one employer being unable to access another employer’s drafts or analytics;
+   - an ordinary user being unable to become an admin;
+   - students being able to read published jobs.
+6. Validate the migration and policies using the project’s available local/test setup. Do not claim a check passed if it was not run.
+7. Report the files changed, schema choices, policies implemented, checks performed, setup steps, and any unresolved decisions.
+
+Do not expose credentials in code, logs, screenshots, or Git. Use `.env.example` with variable names only when needed; never write actual secret values. Do not send real resumes or contact information to an AI service.
+
+Keep the schema small enough to build and test during a 24-hour hackathon. Ask the integration owner before changing shared application contracts. Do not commit, push, or modify the live Supabase project unless explicitly asked.
