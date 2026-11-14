@@ -12,6 +12,7 @@ export const HOME_NAV_LINKS: NavLink[] = [
   { href: '/jobs', label: 'Find jobs' },
   { href: '/saved', label: 'Saved' },
   { href: '/calendar', label: 'Calendar' },
+  { href: '/resume', label: 'Resume' },
 ];
 
 /** In-app student routes: brand link returns home; omit a redundant Home nav item. */
@@ -20,6 +21,7 @@ export const STUDENT_NAV_LINKS: NavLink[] = [
   { href: '/jobs', label: 'Find jobs' },
   { href: '/saved', label: 'Saved' },
   { href: '/calendar', label: 'Calendar' },
+  { href: '/resume', label: 'Resume' },
 ];
 
 /**
