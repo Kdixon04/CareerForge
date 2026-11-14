@@ -6,6 +6,11 @@ Read [AGENTS.md](../AGENTS.md) and the current [team handoff](../teammates.md) b
 
 Known skills: English, Spanish, Python, a little Java, Excel; limited database experience; strengths in aesthetics/navigation and team coordination. React/TypeScript experience and availability remain TBD. Pair briefly on your first route; use shared adapters rather than writing migrations.
 
+## Published reconciliation checkpoint — November 14, 2026
+
+Merge 3c83049 publishes current-main integration through a32c4e4 and the d01c89e application pending-write/reload fix. The single saved-page conflict preserves main's shared navigation/theme shell and the full fictional/no-account-writes notice. Local verification: typecheck/build/Secretlint PASS; 256 unit/integration PASS with 1 existing live skip; 37 mocked contracts PASS; 88 Chromium smoke PASS with 8 existing skips; 14 mocked lab browser checks PASS. Phone/desktop Home/Profile switching, navigation and reload pass in both themes. Hosted CI must pass independently on the final PR head.
+
+Rechecked remote main e3996ec: no src/lib/data atomic profile/application adapters; active profile PATCH still uses separate read/update/delete/insert operations and millisecond timestamp comparison. No reply yet to the linked owner requests. No local Supabase URL/publishable-key or fictional A/B account configuration; no live account writes attempted. Fresh audit: production 0; full audit 6 development findings (2 critical, 1 high, 3 moderate), unresolved and Dallas-owned. PR #35 remains DRAFT. Full assignment, real persistence, production isolation, live security, A/B and deployment remain NOT VERIFIED. Next integration requires Keyan's approved atomic methods plus Dallas's protected isolated environment and approvals; see LIVE-VERIFICATION.md. Historical checkpoints below are superseded by this note where applicable.
 ## Current coordination gate — November 14, 2026
 
 PR #17 (theme, c9ac840) and #29 (fictional saved preview, 317f6dd) are already merged by walker2023-glitch, with passing CI on their original heads. Steve did not re-merge or rewrite either. PR #35 remains DRAFT and the full assignment is not complete.
