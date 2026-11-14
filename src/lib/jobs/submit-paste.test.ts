@@ -130,25 +130,19 @@ describe('submitPasteJob', () => {
     vi.unstubAllGlobals();
   });
 
-  it('validates required fields in fixture mode', async () => {
-    const emptyInput: PasteJobInput = {
-      title: '',
-      company: '',
-      description: '',
-      location: '',
-      jobType: 'unknown',
-      workMode: 'unknown',
-      sourceUrl: '',
-      deadline: '',
-    };
+  it('returns a typed error when the merged parse route is unreachable', async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error('network unavailable'));
+    vi.stubGlobal('fetch', fetchMock);
 
-    const result = await submitPasteJob(emptyInput);
+    const result = await submitPasteJob(validBaseInput);
 
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.errors.title).toBeTruthy();
-      expect(result.errors.company).toBeTruthy();
-      expect(result.errors.description).toBeTruthy();
-    }
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      ok: false,
+      errors: {},
+      message: 'Unable to reach job parse service',
+    });
+
+    vi.unstubAllGlobals();
   });
 });
