@@ -88,6 +88,10 @@ export async function submitPasteJob(
         | null;
       const errorMessage = errorJson?.error?.message ?? 'Server rejected job input';
 
+      if (response.status >= 500) {
+        return { ok: false, errors: {}, message: errorMessage || 'Server error parsing job description' };
+      }
+
       const errors: PasteJobFieldErrors = {};
       const lower = errorMessage.toLowerCase();
       if (lower.includes('title')) errors.title = lower.includes('required') ? 'This field is required.' : errorMessage;
