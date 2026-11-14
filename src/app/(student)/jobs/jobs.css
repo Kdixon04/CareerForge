@@ -1,0 +1,44 @@
+.cf-jobs { min-height: 100vh; background: var(--cf-bg); color: var(--cf-text); font-family: var(--cf-font); line-height: 1.6; }
+.cf-jobs *, .cf-jobs *::before, .cf-jobs *::after { box-sizing: border-box; }
+.cf-jobs-shell { width: min(1040px, calc(100% - 3rem)); margin: 0 auto; padding-bottom: 3rem; }
+.cf-jobs-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.5rem 0; border-bottom: 1px solid var(--cf-border); margin-bottom: 2.5rem; }
+.cf-jobs-brand { color: var(--cf-text); text-decoration: none; font-size: 1.25rem; font-weight: 750; letter-spacing: -.035em; }
+.cf-jobs-brand:focus-visible { outline: 3px solid var(--cf-focus); outline-offset: 4px; }
+.cf-jobs h1 { font-size: clamp(2.2rem, 5.5vw, 3.2rem); line-height: 1.1; letter-spacing: -.05em; margin: 0 0 1rem; }
+.cf-jobs h2 { font-size: 1.4rem; letter-spacing: -.03em; margin: 0 0 .75rem; }
+.cf-jobs-eyebrow { color: var(--cf-leather); font-weight: 750; letter-spacing: .12em; font-size: .72rem; margin: 0 0 .5rem; }
+.cf-jobs-intro { color: var(--cf-muted); max-width: 640px; margin: 0 0 1.5rem; }
+.cf-jobs-optional { color: var(--cf-muted); font-weight: 400; font-size: .85em; }
+
+.cf-jobs-notice { border-inline-start: 4px solid var(--cf-accent); background: var(--cf-subtle); padding: 1rem 1.25rem; margin-bottom: 2rem; border-radius: 0 .7rem .7rem 0; }
+.cf-jobs-notice p { margin: .3rem 0 0; font-size: .92rem; }
+
+.cf-jobs-example { border: 1px solid var(--cf-border); background: var(--cf-surface); border-radius: 1rem; padding: 1.5rem; margin-bottom: 2.5rem; }
+.cf-jobs-example h2 { margin: .75rem 0 .35rem; }
+
+.cf-jobs-form-heading { margin-bottom: 1rem; }
+.cf-jobs-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.75rem; align-items: start; }
+.cf-jobs-form { display: grid; gap: 1.1rem; min-width: 0; }
+.cf-jobs-form textarea.cf-input { resize: vertical; min-height: 9rem; }
+.cf-jobs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.cf-jobs-form .cf-button { justify-self: start; }
+
+.cf-jobs-preview { min-width: 0; }
+.cf-jobs-empty { border: 1px dashed var(--cf-border); border-radius: .75rem; padding: 1.5rem; color: var(--cf-muted); margin: 0; }
+.cf-jobs-card { border: 1px solid var(--cf-border); background: var(--cf-surface); border-radius: 1rem; padding: 1.5rem; }
+.cf-jobs-card-top { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: space-between; font-size: .72rem; }
+.cf-jobs-badge { font-weight: 700; color: var(--cf-on-accent); background: var(--cf-accent); border-radius: 999px; padding: .25rem .6rem; letter-spacing: .02em; }
+.cf-jobs-badge--muted { color: var(--cf-text); background: transparent; border: 1px solid var(--cf-border); }
+.cf-jobs-badge--example { background: var(--cf-leather); color: var(--cf-bg); }
+.cf-jobs-card h3 { margin: .9rem 0 .35rem; font-size: 1.4rem; letter-spacing: -.03em; }
+.cf-jobs-card-meta { color: var(--cf-muted); margin: 0 0 .5rem; }
+.cf-jobs-card-description { white-space: pre-wrap; overflow-wrap: anywhere; margin: .75rem 0; }
+.cf-jobs-card-source { overflow-wrap: anywhere; margin: .5rem 0; }
+.cf-jobs-card-source a { color: var(--cf-focus); }
+.cf-jobs-card-note { color: var(--cf-muted); font-size: .85rem; margin: .75rem 0 0; }
+
+@media (max-width: 760px) {
+  .cf-jobs-shell { width: calc(100% - 2rem); }
+  .cf-jobs-grid { grid-template-columns: 1fr; }
+  .cf-jobs-row { grid-template-columns: 1fr; }
+}

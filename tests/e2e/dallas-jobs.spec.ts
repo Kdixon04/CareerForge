@@ -1,0 +1,78 @@
+import { expect, test } from '@playwright/test';
+
+// Covers the fictional pasted-job slice at /jobs: honest "unsaved / unverified"
+// labelling, an example opportunity with a source link, client-side validation
+// errors, a safe (escaped) preview of pasted text, and both themes at phone and
+// desktop widths. No server routes or persistence are involved.
+
+for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
+  for (const colorScheme of ['light', 'dark'] as const) {
+    test(`paste-a-job ${viewport.width}px / ${colorScheme}: labels, validation and safe preview`, async ({ browser }) => {
+      const context = await browser.newContext({ viewport, colorScheme });
+      const page = await context.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', error => errors.push(error.message));
+      page.on('console', message => {
+        if (message.type() === 'error' && !message.location().url.endsWith('/favicon.ico')) errors.push(message.text());
+      });
+
+      await page.goto('/jobs');
+
+      // Theme applied globally by the root init script.
+      await expect(page.locator('html')).toHaveAttribute('data-theme', colorScheme);
+
+      // Honest limitations are stated up front.
+      await expect(page.getByText('Nothing here is saved yet.')).toBeVisible();
+
+      // Example opportunity is clearly labelled and shows its source link.
+      const example = page.getByRole('region', { name: 'Example opportunity' });
+      await expect(example.getByText('Example opportunity')).toBeVisible();
+      await expect(example.getByText('● Unverified')).toBeVisible();
+      await expect(example.getByRole('link', { name: 'https://example.com/jobs/job-001' })).toBeVisible();
+
+      const preview = page.getByRole('region', { name: 'Pasted job preview' });
+      await expect(preview.getByText(/appear here as an unsaved preview/)).toBeVisible();
+
+      // Submitting an empty form surfaces validation errors and no preview.
+      await page.getByRole('button', { name: 'Preview pasted job' }).click();
+      await expect(page.getByText('This field is required.').first()).toBeVisible();
+      await expect(page.getByRole('textbox', { name: 'Job title' })).toHaveAttribute('aria-invalid', 'true');
+      await expect(preview.getByRole('article')).toHaveCount(0);
+
+      // A non-https source URL is rejected with a specific message.
+      await page.getByRole('textbox', { name: 'Job title' }).fill('Junior Web Developer');
+      await page.getByRole('textbox', { name: 'Company' }).fill('North Star Labs');
+      const xssText = '<img src=x onerror="window.__xss=1"> Build accessible interfaces.';
+      await page.getByRole('textbox', { name: 'Job description' }).fill(xssText);
+      await page.getByRole('textbox', { name: /Source URL/ }).fill('http://insecure.example.com/1');
+      await page.getByRole('button', { name: 'Preview pasted job' }).click();
+      await expect(page.getByText('Enter a full https:// URL, or leave it blank.')).toBeVisible();
+      await expect(preview.getByRole('article')).toHaveCount(0);
+
+      // Fixing the URL produces a safe, clearly-labelled preview.
+      await page.getByRole('textbox', { name: /Source URL/ }).fill('https://example.com/jobs/job-001');
+      await page.getByRole('combobox', { name: 'Job type' }).selectOption('full_time');
+      await page.getByRole('combobox', { name: 'Work arrangement' }).selectOption('on_site');
+      await page.getByRole('button', { name: 'Preview pasted job' }).click();
+
+      const card = preview.getByRole('article');
+      await expect(card).toBeVisible();
+      await expect(card.getByText('Preview — not saved')).toBeVisible();
+      await expect(card.getByText('● Unverified')).toBeVisible();
+      await expect(card.getByRole('heading', { name: 'Junior Web Developer' })).toBeVisible();
+      await expect(card.getByText(/North Star Labs/)).toBeVisible();
+      await expect(card.getByRole('link', { name: 'https://example.com/jobs/job-001' })).toBeVisible();
+
+      // Pasted text is rendered as text, never as HTML.
+      await expect(card.getByText(xssText)).toBeVisible();
+      expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined();
+      expect(await page.locator('.cf-jobs-card-description img').count()).toBe(0);
+
+      // No horizontal overflow and no console/page errors.
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      expect(errors).toEqual([]);
+
+      await context.close();
+    });
+  }
+}
