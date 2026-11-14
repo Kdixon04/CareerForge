@@ -1,5 +1,7 @@
 # Steve — saved-application fixture UI handoff
 
+Current integration note (November 14, 2026): main has sign-in, a connected `/profile` save path and published-job browsing. This `/saved` route is still fictional and memory-only: no account reads or writes, no application persistence, and reload resets edits. Its browser checks use explicit fixture settings and do not establish database or account isolation. The branch and test checkpoints below are historical; review the current PR head and CI for current results.
+
 Branch: `feature/steve-saved-preview`, PR #29, synced with main `a64f637`. The intervening main changes after the locally tested `8964410` base are documentation only. Theme PR #17 is separate: code checkpoint `38336c7` passed CI run 43589998919; its later documentation-only main sync is `c9ac840` (see current PR checks). Only Steve-owned source, tests and handoffs change. Full shared AGENTS.md, contracts, packages, auth clients, adapters and SQL are unchanged.
 
 ## New preparation branch (separate from PR #29)
