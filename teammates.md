@@ -10,19 +10,19 @@ Main has a Next.js landing page, provisional [contracts](src/contracts/), [ficti
 
 **Ownership exception:** Steve unavailable 2026-11-14; Dallas patched MainNav, root-shell wiring, and steve-shell.spec.ts rebase. The AGENTS.md ownership table still stands for all future work.
 
-**Integration status — 2026-11-14 (~1:50 Denver):** `main` at `d0391d8`. Merged since prior handoff: [#48](https://github.com/Kdixon04/CareerForge/pull/48) (RootShell student nav + deploy/docs) and [#50](https://github.com/Kdixon04/CareerForge/pull/50) (inert fail-closed résumé suggest/get/patch). Confirmed on main: `src/app/(student)/layout.tsx`, `src/app/api/resume/**`. Prep hub (#45/#47) and private import/read remain inert/fail-closed. **`src/lib/data/**` still not on main** — see exact adapter signatures in [keyan-adapter-impl-prompt.md](assignments/keyan-adapter-impl-prompt.md); honest demo claims in [judges-feature-list.md](assignments/judges-feature-list.md).
+**Integration status — 2026-11-14 (~2:55 Denver):** `main` at `e3996ec` (docs [#51](https://github.com/Kdixon04/CareerForge/pull/51) on top of [#49](https://github.com/Kdixon04/CareerForge/pull/49)). Earlier merges: [#48](https://github.com/Kdixon04/CareerForge/pull/48) (RootShell student nav + deploy/docs), [#50](https://github.com/Kdixon04/CareerForge/pull/50) (inert fail-closed résumé suggest/get/patch). Confirmed on main: `src/app/(student)/layout.tsx`, `src/app/api/resume/**`. Adapter signatures: [keyan-adapter-impl-prompt.md](assignments/keyan-adapter-impl-prompt.md); honest demo claims: [judges-feature-list.md](assignments/judges-feature-list.md).
 
-**PR [#49](https://github.com/Kdixon04/CareerForge/pull/49) (`feat/persist-pasted-jobs`) — NOT MERGE READY:** open, `mergeable=CONFLICTING` vs `main`, **no CI checks reported** (0 check runs on head). Diff is only `PasteJobForm.tsx` + new `POST /api/jobs` (direct Supabase insert); it does **not** add fail-closed-safe `src/lib/data/jobs` adapters and conflicts with main’s existing inert `POST /api/jobs/import`. Do **not** merge; do **not** flip persistence flags. Close or rewrite after Keyan ships adapters.
+**PR #49 follow-up (diagnosed open/CONFLICTING/no checks, then merged):** Keyan resolved conflicts and merged [#49](https://github.com/Kdixon04/CareerForge/pull/49) (`a32c4e4`); merge-push CI on main was green. It does **not** add `src/lib/data/**`. It adds Dallas-path `POST /api/jobs` with direct user-scoped Supabase insert, retargets `JOB_IMPORT_ROUTE` to `/api/jobs`, and sets `IS_JOB_PERSISTENCE_AVAILABLE = true` (flag flip happened). Contract `POST /api/jobs/import` remains inert/fail-closed in parallel. **`src/lib/data/**` still missing** — treat private save as provisional/bypass until adapters land; do not claim adapter-backed persistence.
 
 **Deployed smoke: NOT RUN** until a human completes [vercel-supabase-deploy-checklist.md](assignments/vercel-supabase-deploy-checklist.md) (no secrets in Git).
 
 **Next 90 minutes (by owner):**
 
-- **Dallas:** Keep import/resume routes fail-closed; do not merge #49; after Keyan lands `src/lib/data/jobs` (+ résumé if ready) with green CI, enable one-line adapter wiring only—no persistence flag flips until review; human deploy checklist + smoke; ping Will with URL + [WILL-VIDEO-SCRIPT.md](demo/WILL-VIDEO-SCRIPT.md).
-- **Keyan:** Close/rewrite #49; implement `src/lib/data/jobs.ts` (+ résumé adapters) per [keyan-adapter-impl-prompt.md](assignments/keyan-adapter-impl-prompt.md) with user-scoped client/RLS; confirm migrations + seed ≥1 published employer job; Auth redirect URLs.
+- **Dallas:** Prefer flipping `IS_JOB_PERSISTENCE_AVAILABLE` back to `false` until Keyan ships `src/lib/data/jobs` and wires `POST /api/jobs/import`; keep résumé fail-closed; human deploy checklist + smoke; ping Will with URL + [WILL-VIDEO-SCRIPT.md](demo/WILL-VIDEO-SCRIPT.md).
+- **Keyan:** Ship `src/lib/data/jobs.ts` (+ résumé) per [keyan-adapter-impl-prompt.md](assignments/keyan-adapter-impl-prompt.md); replace the bypass `POST /api/jobs` insert with adapter-backed `/api/jobs/import`; confirm migrations + seed ≥1 published employer job; Auth redirect URLs.
 - **Steve (Dallas nav patch):** Shared student nav shipped via #48; further UI polish only if bandwidth.
-- **Will:** Lock narration from demo table / [judges-feature-list.md](assignments/judges-feature-list.md); record after deploy smoke; fictional student only; label FIXTURE rows on screen.
-- **Antigravity / Codex:** Enable import/GET/résumé only when Keyan adapters land; integrator merges only—no env invention.
+- **Will:** Lock narration from demo table / [judges-feature-list.md](assignments/judges-feature-list.md); record after deploy smoke; fictional student only; label FIXTURE / provisional persistence honestly.
+- **Antigravity / Codex:** Do not enable more persistence paths until adapters land; integrator merges only—no env invention.
 
 **Proposed scope for 4pm (confirm with human/Keyan):** saved-application **persistence CUT** → labeled fixture on `/saved` (Steve unavailable); **employer journey CUT**; Keyan prioritizes `src/lib/data/jobs.ts` + résumé adapters, then deploy env. Private import + résumé reload are **stretch-to-core** if adapters land in time.
 
@@ -34,8 +34,8 @@ Main has a Next.js landing page, provisional [contracts](src/contracts/), [ficti
 | Profile save/reload | `/profile` | **Real** when adapter + env (target) |
 | Browse + filters | `/jobs` | **Real** published rows when DB seeded; CI uses fixture env |
 | Job detail | `/jobs/[id]` | **Real** or fixture per env |
-| Paste preview | `/jobs` form | **Real** parse; save private **off** until flag flip |
-| Match / résumé edit | `/match/[id]` | **Fixture** until résumé routes + adapter |
+| Paste preview | `/jobs` form | **Real** parse; private save **provisional** (`IS_JOB_PERSISTENCE_AVAILABLE=true` via #49 bypass `POST /api/jobs`, not adapter) |
+| Match / résumé edit | `/match/[id]` | **Fixture** / fail-closed API until résumé adapter |
 | Saved applications | `/saved` | **Fixture** (proposed cut) |
 | Calendar | `/calendar` | **Fixture** sample schedule |
 | Prep hub | `/jobs/[id]/prep` | **Fixture** (PR #45, `IS_PREP_LIVE` false) |
