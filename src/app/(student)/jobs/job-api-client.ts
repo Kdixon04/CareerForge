@@ -1,13 +1,15 @@
 import { JobDraftSchema, JobPostingSchema, type JobDraft, type JobPosting } from '../../../contracts';
 
-export const JOB_IMPORT_ROUTE = '/api/jobs';
+export const JOB_IMPORT_ROUTE = '/api/jobs/import';
 
 /**
- * Flip to true only after Antigravity merges POST /api/jobs/import and GET /api/jobs/[id]
- * and Dallas confirms smoke with authenticated sessions. While false, Cursor does not
- * call those routes in the browser or in routine Playwright runs.
+ * Flip to true only after Keyan ships src/lib/data/jobs.ts adapters, Antigravity wires
+ * POST /api/jobs/import and GET /api/jobs/[id], and Dallas confirms smoke with
+ * authenticated sessions. While false, Cursor does not call those routes in the browser
+ * or in routine Playwright runs. #49 set this true with a bypass POST /api/jobs (no
+ * adapters); safety revert keeps UI fail-closed until adapter-backed import lands.
  */
-export const IS_JOB_PERSISTENCE_AVAILABLE = true;
+export const IS_JOB_PERSISTENCE_AVAILABLE = false;
 
 type ApiSuccess<T> = { data: T };
 type ApiFailure = { error: { code: string; message: string } };
