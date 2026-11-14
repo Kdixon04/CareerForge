@@ -11,9 +11,9 @@ const { build } = require('esbuild');
 const React = require('react');
 const { renderToString } = require('react-dom/server');
 const nodePaths = [join(toolchain, 'node_modules')];
-await build({ entryPoints: ['src/components/ui/examples/DesignPreview.tsx'], outfile: join(toolchain, 'steve-preview.cjs'), bundle: true, platform: 'node', format: 'cjs', jsx: 'automatic', external: ['react', 'react/*'], nodePaths });
-await build({ entryPoints: ['src/components/ui/examples/preview-client.tsx'], outfile: join(toolchain, 'steve-preview.js'), bundle: true, platform: 'browser', format: 'esm', jsx: 'automatic', nodePaths, define: { 'process.env.NODE_ENV': '"development"' } });
-await build({ entryPoints: ['src/components/theme/theme.ts'], outfile: join(toolchain, 'steve-theme.cjs'), bundle: true, platform: 'node', format: 'cjs' });
+await build({ entryPoints: [resolve('src/components/ui/examples/DesignPreview.tsx')], outfile: join(toolchain, 'steve-preview.cjs'), bundle: true, platform: 'node', format: 'cjs', jsx: 'automatic', external: ['react', 'react/*'], nodePaths });
+await build({ entryPoints: [resolve('src/components/ui/examples/preview-client.tsx')], outfile: join(toolchain, 'steve-preview.js'), bundle: true, platform: 'browser', format: 'esm', jsx: 'automatic', nodePaths, define: { 'process.env.NODE_ENV': '"development"' } });
+await build({ entryPoints: [resolve('src/components/theme/theme.ts')], outfile: join(toolchain, 'steve-theme.cjs'), bundle: true, platform: 'node', format: 'cjs' });
 const { DesignPreview } = require(join(toolchain, 'steve-preview.cjs'));
 const { THEME_INIT_SCRIPT } = require(join(toolchain, 'steve-theme.cjs'));
 const assets = new Map([

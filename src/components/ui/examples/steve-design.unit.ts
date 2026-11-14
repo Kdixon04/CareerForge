@@ -2,12 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
-import { resolveTheme, THEME_INIT_SCRIPT } from '../../src/components/theme/theme';
+import { resolveTheme, THEME_INIT_SCRIPT } from '../../theme/theme';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Button } from '../../src/components/ui/Button';
-import { Input } from '../../src/components/ui/Input';
-import { MainNav } from '../../src/components/nav/MainNav';
+import { Button } from '../Button';
+import { Input } from '../Input';
+import { MainNav } from '../../nav/MainNav';
 
 test('button defaults to a non-submit button and loading is natively disabled', () => {
   const normal = renderToStaticMarkup(createElement(Button, null, 'Continue'));
@@ -81,7 +81,7 @@ test('both themes define readable text, action, border, error and focus colors',
   const css = existsSync(path) ? readFileSync(path, 'utf8') : '';
   for (const theme of ['light', 'dark']) {
     const block = css.match(new RegExp(`\\[data-theme="${theme}"\\]\\s*\\{([^}]+)`))?.[1] ?? '';
-    const tokens = Object.fromEntries([...block.matchAll(/--cf-([\w-]+):\s*(#[\da-f]{6})/gi)].map(m => [m[1], m[2]]));
+    const tokens = Object.fromEntries(Array.from(block.matchAll(/--cf-([\w-]+):\s*(#[\da-f]{6})/gi), m => [m[1], m[2]]));
     for (const key of ['bg', 'surface', 'text', 'muted', 'accent', 'on-accent', 'border', 'focus', 'danger']) {
       assert.ok(tokens[key], `${theme} must define --cf-${key}`);
     }

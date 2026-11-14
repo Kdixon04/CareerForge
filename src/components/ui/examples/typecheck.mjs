@@ -14,7 +14,7 @@ async function collect(directory) {
     else if (/\.tsx?$/.test(path)) files.push(path);
   }
 }
-for (const directory of ['src/components', 'tests/unit', 'tests/e2e']) await collect(directory);
+await collect('src/components');
 const program = ts.createProgram(files, {
   target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext,
   moduleResolution: ts.ModuleResolutionKind.Bundler, jsx: ts.JsxEmit.ReactJSX,

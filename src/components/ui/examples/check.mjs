@@ -1,4 +1,4 @@
-// Isolated checks while Dallas's scaffold is unavailable. No app dependencies are modified.
+// Component fixture unit checks with the separate preview toolchain.
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -9,7 +9,7 @@ const require = createRequire(join(resolve(toolchain), 'package.json'));
 const { build } = require('esbuild');
 const output = join(toolchain, 'steve-design-unit.cjs');
 await build({
-  entryPoints: ['tests/unit/steve-design.test.ts'], outfile: output,
+  entryPoints: [resolve('src/components/ui/examples/steve-design.unit.ts')], outfile: output,
   bundle: true, platform: 'node', format: 'cjs', jsx: 'automatic',
   nodePaths: [join(toolchain, 'node_modules')],
 });
