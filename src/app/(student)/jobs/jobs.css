@@ -1,6 +1,6 @@
 .cf-jobs { min-height: 100vh; background: var(--cf-bg); color: var(--cf-text); font-family: var(--cf-font); line-height: 1.6; }
 .cf-jobs *, .cf-jobs *::before, .cf-jobs *::after { box-sizing: border-box; }
-.cf-jobs-shell { width: min(1040px, calc(100% - 3rem)); margin: 0 auto; padding-bottom: 3rem; }
+.cf-jobs-shell { width: min(1040px, calc(100% - 3rem)); margin: 0 auto; padding: 1.5rem 0 3rem; }
 .cf-jobs-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.5rem 0; border-bottom: 1px solid var(--cf-border); margin-bottom: 2.5rem; }
 .cf-jobs-brand { color: var(--cf-text); text-decoration: none; font-size: 1.25rem; font-weight: 750; letter-spacing: -.035em; }
 .cf-jobs-brand:focus-visible, .cf-jobs-back:focus-visible { outline: 3px solid var(--cf-focus); outline-offset: 4px; }

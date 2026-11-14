@@ -88,7 +88,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
       await page.getByRole('link', { name: 'Open example job detail' }).first().click();
       await page.waitForURL(`**/jobs/${EXAMPLE_JOB_ID}`);
       await expect(page.getByText('Fixture preview — not loaded from the database.')).toBeVisible();
-      await expect(page.getByRole('link', { name: 'Review résumé suggestions' })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Review match', exact: true })).toBeVisible();
 
       // No horizontal overflow and no console/page errors.
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

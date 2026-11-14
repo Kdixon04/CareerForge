@@ -15,14 +15,8 @@ export default async function JobsPage() {
 
   return (
     <div className="cf-jobs">
-      <a className="cf-skip" href="#jobs-main">Skip to content</a>
-
       <div className="cf-jobs-shell">
-        <header className="cf-jobs-header">
-          <a href="/" className="cf-jobs-brand">Career Forge</a>
-        </header>
-
-        <main id="jobs-main" tabIndex={-1}>
+        <main id="main" tabIndex={-1}>
           <p className="cf-jobs-eyebrow">FIND A JOB</p>
           <h1>Find opportunities worth pursuing.</h1>
           <p className="cf-jobs-intro">

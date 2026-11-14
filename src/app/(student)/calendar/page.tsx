@@ -31,7 +31,7 @@ export default function CalendarPage() {
   const monthEvents = events.filter((event) => event.date.startsWith(month.toISOString().slice(0, 7)));
 
   return (
-    <main className="calendar-shell" aria-labelledby="calendar-title">
+    <main id="main" tabIndex={-1} className="calendar-shell" aria-labelledby="calendar-title">
       <div className="calendar-header">
         <div>
           <p className="eyebrow">Career Forge · fixture preview</p>

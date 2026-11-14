@@ -21,14 +21,14 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
     // The init script applies the system-default (light) theme before React hydrates.
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
-    // Navigation exposes only real routes. No employer link without a verified role,
-    // and no links to not-yet-built pages.
+    // Full student link set on the landing shell; no employer link without a verified role.
     const nav = page.getByRole('navigation', { name: 'Main navigation' });
     await expect(nav.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Profile', exact: true })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Find jobs', exact: true })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Saved', exact: true })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Calendar', exact: true })).toBeVisible();
     await expect(nav.getByRole('link', { name: 'Employer', exact: true })).toHaveCount(0);
-    await expect(nav.getByRole('link', { name: 'Find jobs', exact: true })).toHaveCount(0);
-    await expect(nav.getByRole('link', { name: 'Saved', exact: true })).toHaveCount(0);
 
     // Skip link reaches the landing main region.
     await page.keyboard.press('Tab');
@@ -51,8 +51,11 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.getByRole('heading', { name: 'Start with your story.' })).toBeVisible();
 
-    // Navigate back home via the profile brand link.
-    await page.getByRole('link', { name: 'Career Forge', exact: true }).click();
+    // Student routes share MainNav in the root shell — Find jobs should be visible on profile.
+    await expect(nav.getByRole('link', { name: 'Find jobs', exact: true })).toBeVisible();
+
+    // Navigate back home via the shared brand link.
+    await page.getByRole('link', { name: 'Career Forge home', exact: true }).click();
     await page.waitForURL(url => new URL(url).pathname === '/');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.getByRole('navigation', { name: 'Main navigation' })).toBeVisible();

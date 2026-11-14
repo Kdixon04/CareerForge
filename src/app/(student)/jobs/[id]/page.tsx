@@ -22,15 +22,11 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
   return (
     <div className="cf-jobs">
-      <a className="cf-skip" href="#jobs-main">Skip to content</a>
-
       <div className="cf-jobs-shell">
-        <header className="cf-jobs-header">
-          <a href="/" className="cf-jobs-brand">Career Forge</a>
-          <a href="/jobs" className="cf-jobs-back">← Back to jobs</a>
-        </header>
-
-        <main id="jobs-main" tabIndex={-1}>
+        <main id="main" tabIndex={-1}>
+          <p style={{ margin: '0 0 1.5rem' }}>
+            <a href="/jobs" className="cf-jobs-back">← Back to jobs</a>
+          </p>
           {job ? (
             <KnownJobDetail job={job} fixtureMode={fixtureMode} />
           ) : (
@@ -107,18 +103,17 @@ function KnownJobDetail({
       <section className="cf-jobs-next" aria-label="Next steps">
         <h2>Next steps</h2>
         <p className="cf-jobs-card-note">
-          Saving applications and résumé matching will be connected in the next integration steps.
+          Review how your experience lines up, then practice for the role. Match uses fixture data until
+          résumé generation is connected; prep is a preview route until Will ships the hub.
         </p>
-        {fixtureMode && (
-          <a className="cf-button" href={`/match/${job.id}`}>
-            Review résumé suggestions
-          </a>
-        )}
-        <a className="cf-button cf-button--secondary" href={`/jobs/${job.id}/prep`}>
-          Prep for this role (preview)
+        <a className="cf-button" href={`/match/${job.id}`}>
+          Review match
         </a>
-        <a className="cf-button cf-button--secondary" href="/jobs">
-          Back to jobs
+        <a className="cf-button cf-button--secondary" href={`/jobs/${job.id}/prep`}>
+          Prep for this role
+        </a>
+        <a className="cf-button cf-button--secondary" href="/saved">
+          View saved applications
         </a>
       </section>
     </>

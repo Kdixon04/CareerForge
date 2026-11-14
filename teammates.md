@@ -10,7 +10,15 @@ Main has a Next.js landing page, provisional [contracts](src/contracts/), [ficti
 
 **Ownership exception:** Steve unavailable 2026-11-14; Dallas patched MainNav, root-shell wiring, and steve-shell.spec.ts rebase. The AGENTS.md ownership table still stands for all future work.
 
-**Integration status — 2026-11-14 (~12:00 Denver, waiting on Keyan + deploy):** `main` at `c35702c`. Includes inert `POST /api/jobs/import` + `GET /api/jobs/[id]` (#44), filters #42, calendar #41, fail-closed handlers #40. **Open:** #35 (DRAFT), #45 (stretch prep hub UI — fixture, not merged). **No Antigravity prep/résumé routes PR on GitHub yet** (integrate when CI-green + fail-closed). **Deployed smoke: NOT RUN** — Vercel + Supabase env pending Keyan. **Prep for Keyan:** [keyan-ask.md](assignments/keyan-ask.md), [core-at-12-runbook.md](assignments/core-at-12-runbook.md).
+**Integration status — 2026-11-14 (~1:20 Denver):** `main` at `38510cb`. Prep hub UI (#45) and inert prep API routes (#47) merged (fixture / fail-closed). Prior student-path merges include #44 import/read, filters #42, calendar #41, handlers #40. **`src/lib/data/**` not on main yet** — blocking private job persistence, profile save, and résumé adapters ([keyan-ask.md](assignments/keyan-ask.md)). **Deployed smoke: NOT RUN** until a human completes [vercel-supabase-deploy-checklist.md](assignments/vercel-supabase-deploy-checklist.md) (no secrets in Git).
+
+**Next 90 minutes (by owner):**
+
+- **Dallas:** Human runs deploy checklist with Keyan; mirror `.env.local` → Vercel; merge Keyan `src/lib/data` PR when green; post-deploy smoke (sign-in → profile → `/jobs`); ping Will with URL + [WILL-VIDEO-SCRIPT.md](demo/WILL-VIDEO-SCRIPT.md).
+- **Keyan:** Confirm migrations `20261113200000` + `20261114091500` on demo Supabase; seed ≥1 fictional **published** employer job; ship **`src/lib/data/jobs.ts`** first, profile second, résumé if slack; Supabase Auth redirect URLs for `APP_URL` + Vercel hosts.
+- **Steve (Dallas nav patch):** Shared student nav (Profile, Jobs, Saved, Calendar) on all student routes; job detail → Match/Prep CTAs; mobile/light-dark pass on profile + jobs.
+- **Will:** Lock narration from demo table below; record after deploy smoke ~2:30; fictional student only; label FIXTURE rows on screen.
+- **Antigravity / Codex:** Wire import/GET when `jobs.ts` lands; résumé routes when adapter exists; integrator merges only—no env invention.
 
 **Proposed scope for 4pm (confirm with human/Keyan):** saved-application **persistence CUT** → labeled fixture on `/saved` (Steve unavailable); **employer journey CUT**; Keyan prioritizes `src/lib/data/jobs.ts` + résumé adapters, then deploy env. Private import + résumé reload are **stretch-to-core** if adapters land in time.
 

@@ -18,15 +18,11 @@ export default async function PrepPage({ params }: PrepPageProps) {
 
   return (
     <div className="cf-jobs">
-      <a className="cf-skip" href="#prep-main">Skip to content</a>
-
       <div className="cf-jobs-shell">
-        <header className="cf-jobs-header">
-          <a href="/" className="cf-jobs-brand">Career Forge</a>
-          <a href={`/jobs/${id}`} className="cf-jobs-back">← Back to job detail</a>
-        </header>
-
-        <main id="prep-main" tabIndex={-1}>
+        <main id="main" tabIndex={-1}>
+          <p style={{ margin: '0 0 1.5rem' }}>
+            <a href={`/jobs/${id}`} className="cf-jobs-back">← Back to job detail</a>
+          </p>
           <p className="cf-jobs-eyebrow">PREP FOR THIS ROLE</p>
           <h1>Interview prep (preview)</h1>
 
