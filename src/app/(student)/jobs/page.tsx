@@ -46,6 +46,11 @@ export default function JobsPage() {
               </p>
             )}
             <p className="cf-jobs-card-note">Fictional sample data, shown to illustrate the layout.</p>
+            <p className="cf-jobs-example-actions">
+              <a className="cf-button cf-button--secondary" href={`/jobs/${exampleJob.id}`}>
+                Open example job detail
+              </a>
+            </p>
           </section>
 
           <h2 className="cf-jobs-form-heading">Paste your own</h2>
