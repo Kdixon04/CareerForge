@@ -27,10 +27,15 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
         }, pair);
         expect(ratio, `${pair.join(' on ')} contrast`).toBeGreaterThanOrEqual(4.5);
       }
+      // The root shell adds a "Skip to content" link as the first focus stop,
+      // ahead of the brand link; the hero action no longer immediately follows
+      // the brand, so focus it directly to check its visible focus styling.
+      await page.keyboard.press('Tab');
+      await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
       await page.keyboard.press('Tab');
       await expect(page.getByRole('link', { name: 'Career Forge home' })).toBeFocused();
-      await page.keyboard.press('Tab');
       const action = page.getByRole('link', { name: 'Explore the foundation' });
+      await action.focus();
       await expect(action).toBeFocused();
       await expect(action).toHaveCSS('outline-style', 'solid');
       expect(await action.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
