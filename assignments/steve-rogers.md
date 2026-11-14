@@ -1,0 +1,49 @@
+# Steve Rogers — student profile, saved applications, and design
+
+Read [AGENTS.md](../AGENTS.md) first. You own the student profile and saved-application experience through the UI and route layer. Keyan owns SQL and supplies user-scoped adapters; Dallas owns scaffold/shared schemas/auth shell and AI/job pages. This avoids making Dallas wire every form.
+
+Known skills: English, Spanish, Python, a little Java, Excel; limited database experience; strengths in aesthetics/navigation and team coordination. React/TypeScript experience and availability remain TBD. Pair briefly on your first route; use shared adapters rather than writing migrations.
+
+## Paths and first slice
+
+Owned: src/app/(student)/profile/**, src/app/(student)/saved/**, src/app/api/profile/**, src/app/api/applications/**, src/components/ui/**, src/components/nav/**, src/components/theme/**, src/styles/**, src/app/globals.css, public/brand/**, tests/e2e/steve-*.spec.ts, tests/unit/steve-*.test.ts.
+
+Request changes outside those paths. Dallas wires your navigation/theme provider into root layout; coordinate small named props before integration. Don't edit package/config/lockfiles, contracts, SQL/adapters, employer pages or demo files.
+
+First 60–90 minutes:
+1. Inspect actual supplied logo/Stitch references (asset paths TBD). Report missing assets; use accessible Career Forge text as temporary wordmark. Never assume a particular prototype version or inspect claims as verified.
+2. Create semantic tokens for both light and dark themes, plus one accessible Button/Input example. Measure text/control contrast.
+3. Share component props and a screenshot at phone/desktop width with Dallas/Keyan. Don't wait for the whole design system before handing over usable components.
+4. Build profile form against shared fictional fixtures; connect data when Keyan's first adapters land.
+
+## Required deliverables
+
+- Both themes, not a stretch: visible accessible toggle, first-visit system preference, remembered theme preference across navigation/reload, readable forms/focus/errors/cards on all feature pages. Local storage may hold theme preference, not personal profile/resume content.
+- Preserve logo artwork/proportions. Use actual prototype for final colors/fonts; provisional warm leather/orange/gold/cream/charcoal is acceptable until it arrives. Keep controls consistent and professional.
+- Reusable Button/Input/Textarea/Card/Badge and navigation; avoid decorative complexity. Enabled buttons keyboard reachable, disabled native buttons non-activatable. Do not require disabled native controls to be focusable.
+- Profile: display name, career field and add/edit/remove typed skills/interests/education/projects/experience. Shared StudentFact ids support evidence. Clear save/error/loading/empty states.
+- GET/PUT /api/profile use verified caller and Keyan's adapter; reject foreign ids and accept only editable fields. Persist atomic save and show conflict feedback rather than silently overwriting a newer profile.
+- Saved list: job summary/source, status, personal deadline and notes. GET/POST/PATCH/DELETE application routes use Keyan's authorized adapters; don't duplicate job SQL or an analytics save counter. Saving is unique per caller/job.
+- Display paused listings as inactive and hidden listings as unavailable placeholders; retain tracking state. Unknown deadlines read "Deadline not provided"; personal reminder dates don't verify posting deadlines.
+- Main nav supports Profile, Find Jobs, Saved and the correct employer link when permitted. Role-based navigation is convenience, not authorization.
+
+## Tests before feature code
+
+Write tests for validation, fact add/remove, denied foreign id, owned-record route calls, status/deadline updates and save/unsave idempotence. Use fixtures/mocks until adapters exist and label those checks as UI-only; final persistence checks require real test database.
+
+Playwright tests/e2e/steve-profile.spec.ts: sign in -> add skill/project -> save -> reload -> exact values remain -> edit/remove -> reload -> expected data. Saved-app check: save from a job -> change status/notes/reminder -> reload -> values retained -> unsave -> absent. Two-account isolation is shared with Keyan, using ordinary users.
+
+At 390x844 and 1280x800, light and dark: no horizontal overflow; labels/readability/focus/touch targets usable; menu/toggle work by keyboard; theme persists through navigation and reload; loading/empty/error states are readable. Inspect auth/employer pages with their owners for shared theme issues. Use 4.5:1 body-text and 3:1 meaningful non-text/large-text contrast targets; don't claim a ratio without measurement. Send screenshots without real personal data.
+
+Run focused tests, available typecheck/lint/build and integrated Playwright. Report NOT RUN with a reason when tools/credentials are absent; don't call a fixture reload proof of database persistence.
+
+## Security, coordination, and finish
+
+Render user and AI strings as text, not HTML. No keys/logged profiles, client role assignment or cross-user cache. Show plain-English disclosure before relevant content goes to Claude; coordinate final notice with Dallas/Will. Do not persist personal profile data in browser localStorage; use supported Supabase sessions for auth.
+
+Share a working styled component/profile slice early. Each route derives user identity from verified session and uses user-scoped RLS adapter; don't trust request userId. Give Keyan exact missing adapter signatures and Dallas exact shared-schema requests.
+
+Report task/files/checks/browser themes+widths/security findings/blockers/next. If helping track team checkpoints, use a short status note and nudge; don't edit shared ownership without coordination. Final 20–25% is polish/verification/video support, not a new component rewrite.
+
+Stretch after both themes/core persistence: Spanish strings if team wants them, small skeleton polish, calendar export UI with explicitly agreed date behavior.
+
