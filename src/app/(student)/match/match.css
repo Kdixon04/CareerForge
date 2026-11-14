@@ -24,6 +24,7 @@
 .cf-match-gaps li { border: 1px dashed var(--cf-border); border-radius: .75rem; padding: 1rem; }
 .cf-match-gap-label { display: inline-block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--cf-leather); margin-right: .5rem; }
 .cf-match-empty { color: var(--cf-muted); margin: 0; }
+.cf-match-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: .5rem; }
 
 @media (max-width: 760px) {
   .cf-match-shell { width: calc(100% - 2rem); }

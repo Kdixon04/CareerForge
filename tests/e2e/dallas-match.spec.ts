@@ -40,8 +40,20 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 
 
       const bullet = page.getByRole('textbox', { name: 'Suggested bullet 2' });
       await expect(bullet).toBeVisible();
-      await bullet.fill('Edited bullet text for fixture review.');
-      await expect(bullet).toHaveValue('Edited bullet text for fixture review.');
+      const editedSecond = 'Edited bullet text for fixture review.';
+      await bullet.fill(editedSecond);
+      await expect(bullet).toHaveValue(editedSecond);
+
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+      await page.getByRole('button', { name: 'Copy edited bullets' }).focus();
+      await page.keyboard.press('Enter');
+      await expect(page.getByRole('status')).toContainText('Copied your edited bullets');
+      await expect(page.getByRole('status')).toContainText('Saving is still not connected');
+      const clipboardText = await page.evaluate(async () => navigator.clipboard.readText());
+      expect(clipboardText).toContain(editedSecond);
+      expect(clipboardText).not.toContain('40%');
+
+      await expect(page.getByRole('button', { name: 'Save edits (not connected)' })).toBeDisabled();
 
       await expect(page.getByRole('link', { name: /Back to job detail/ })).toBeVisible();
 
